@@ -42,12 +42,12 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pb-20 md:pb-0">
+    <div className="min-h-screen bg-gray-50 flex flex-col pb-24 md:pb-0 overflow-x-hidden">
       <CustomerNavbar onCartOpen={() => setCartOpen(true)} />
       <BottomNav />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-5 py-4 sm:py-6">
+      <div className="max-w-2xl mx-auto w-full px-4 sm:px-5 py-4 sm:py-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">Review Order</h2>
         <p className="text-gray-500 mb-5 sm:mb-6">Table {tableNumber}</p>
 
@@ -67,43 +67,48 @@ export default function CartPage() {
             {items.map((item) => (
               <div
                 key={item.menuItem}
-                className="flex items-center gap-3 sm:gap-4 bg-white rounded-xl p-3 sm:p-4 shadow-sm"
+                className="bg-white rounded-xl p-3 sm:p-4 shadow-sm"
               >
-                {item.image ? (
-                  <img src={item.image} alt={item.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-orange-100 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                    🍽️
+                <div className="flex gap-3 sm:gap-4">
+                  {item.image ? (
+                    <img src={item.image} alt={item.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-orange-100 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                      🍽️
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{item.name}</h4>
+                    <p className="text-xs sm:text-sm text-gray-500">₹{item.price} each</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base mt-1">₹{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{item.name}</h4>
-                  <p className="text-xs sm:text-sm text-gray-500">₹{item.price} each</p>
                 </div>
-                <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-                  <button
-                    onClick={() => updateQuantity(item.menuItem, item.quantity - 1)}
-                    className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-90 transition-all touch-manipulation"
-                  >
-                    <HiMinus className="w-4 h-4" />
-                  </button>
-                  <span className="w-7 sm:w-8 text-center font-semibold text-sm">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.menuItem, item.quantity + 1)}
-                    className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-90 transition-all touch-manipulation"
-                  >
-                    <HiPlus className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => updateQuantity(item.menuItem, item.quantity - 1)}
+                      className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-90 transition-all touch-manipulation"
+                      aria-label="Decrease quantity"
+                    >
+                      <HiMinus className="w-4 h-4" />
+                    </button>
+                    <span className="w-8 text-center font-semibold text-sm min-w-[2rem]">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.menuItem, item.quantity + 1)}
+                      className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 active:scale-90 transition-all touch-manipulation"
+                      aria-label="Increase quantity"
+                    >
+                      <HiPlus className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button
                     onClick={() => removeItem(item.menuItem)}
-                    className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors ml-1 touch-manipulation"
+                    className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50 active:bg-red-100 transition-colors touch-manipulation"
+                    aria-label="Remove item"
                   >
                     <HiTrash className="w-4 h-4" />
                   </button>
                 </div>
-                <p className="font-bold text-gray-900 w-16 sm:w-20 text-right text-sm sm:text-base">
-                  ₹{(item.price * item.quantity).toFixed(2)}
-                </p>
               </div>
             ))}
 
@@ -115,7 +120,7 @@ export default function CartPage() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={loading}
-                className="w-full py-3.5 sm:py-3 bg-orange-500 text-white rounded-xl font-semibold text-base sm:text-lg hover:bg-orange-600 disabled:opacity-50 active:scale-[0.98] transition-all touch-manipulation"
+                className="w-full py-4 sm:py-3.5 bg-orange-500 text-white rounded-xl font-semibold text-base sm:text-lg hover:bg-orange-600 disabled:opacity-50 active:scale-[0.98] transition-all touch-manipulation min-h-[48px]"
               >
                 {loading ? 'Placing Order...' : 'Place Order'}
               </button>
