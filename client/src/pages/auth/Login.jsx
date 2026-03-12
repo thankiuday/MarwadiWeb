@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { HiEye, HiEyeSlash } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { loginCustomer } from '../../api/auth';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,6 +9,7 @@ import { getApiError } from '../../utils/getApiError';
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -66,15 +68,25 @@ export default function Login() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-base focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.password ? 'border-red-500 bg-red-50/50' : 'border-gray-200'
-              }`}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                className={`w-full px-4 py-3 pr-12 rounded-xl border outline-none transition-all text-base focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                  errors.password ? 'border-red-500 bg-red-50/50' : 'border-gray-200'
+                }`}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <HiEyeSlash className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+              </button>
+            </div>
             {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
           </div>
           <button

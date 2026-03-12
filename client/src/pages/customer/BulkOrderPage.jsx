@@ -38,7 +38,8 @@ export default function BulkOrderPage() {
   }, []);
 
   const handleQuantityChange = (itemId, value) => {
-    const num = Math.max(0, parseInt(value, 10) || 0);
+    const cleaned = String(value).replace(/^0+/, '') || '0';
+    const num = Math.max(0, parseInt(cleaned, 10) || 0);
     setQuantities((prev) => ({ ...prev, [itemId]: num }));
   };
 
@@ -106,27 +107,21 @@ export default function BulkOrderPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Pickup Date
             </label>
-            <div className="relative">
-              <input
-                type="date"
-                id="pickup-date"
-                value={pickupDate}
-                onChange={(e) => {
-                  setPickupDate(e.target.value);
-                  if (errors.pickupDate) setErrors((prev) => ({ ...prev, pickupDate: null }));
-                }}
-                min={today}
-                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-gray-900 [color-scheme:light] ${
-                  errors.pickupDate ? 'border-red-500 bg-red-50/50' : 'border-gray-200'
-                }`}
-              />
-              {!pickupDate && !errors.pickupDate && (
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-base">
-                  Select pickup date
-                </span>
-              )}
-              {errors.pickupDate && <p className="mt-1 text-sm text-red-600">{errors.pickupDate}</p>}
-            </div>
+            <input
+              type="date"
+              id="pickup-date"
+              value={pickupDate}
+              onChange={(e) => {
+                setPickupDate(e.target.value);
+                if (errors.pickupDate) setErrors((prev) => ({ ...prev, pickupDate: null }));
+              }}
+              min={today}
+              aria-label="Select pickup date"
+              className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-gray-900 [color-scheme:light] ${
+                errors.pickupDate ? 'border-red-500 bg-red-50/50' : 'border-gray-200'
+              }`}
+            />
+            {errors.pickupDate && <p className="mt-1 text-sm text-red-600">{errors.pickupDate}</p>}
           </div>
 
           <div>
@@ -159,10 +154,11 @@ export default function BulkOrderPage() {
                       <input
                         type="number"
                         min="0"
+                        inputMode="numeric"
                         value={quantities[item._id] || 0}
                         onChange={(e) => handleQuantityChange(item._id, e.target.value)}
                         placeholder="0"
-                        className="w-16 sm:w-20 px-2 py-2 text-center rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                        className="w-16 sm:w-20 px-2 py-2 text-center rounded-lg border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
                   </div>

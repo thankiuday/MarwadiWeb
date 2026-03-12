@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HiEye, HiEyeSlash } from 'react-icons/hi2';
 import { toast } from 'react-toastify';
 import { loginAdmin } from '../../api/auth';
 import { useAuth } from '../../hooks/useAuth';
@@ -8,6 +9,7 @@ import { getApiError } from '../../utils/getApiError';
 
 export default function AdminLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -70,15 +72,25 @@ export default function AdminLogin() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-base text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                errors.password ? 'bg-red-900/50 border-red-500' : 'bg-gray-700 border-gray-600'
-              }`}
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                className={`w-full px-4 py-3 pr-12 rounded-xl border outline-none transition-all text-base text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                  errors.password ? 'bg-red-900/50 border-red-500' : 'bg-gray-700 border-gray-600'
+                }`}
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-200 rounded-lg hover:bg-gray-600 transition-colors"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <HiEyeSlash className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
+              </button>
+            </div>
             {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
           </div>
           <button
