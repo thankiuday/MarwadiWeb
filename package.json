@@ -2,6 +2,7 @@
   "name": "marwadi-web",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "King's Restaurant - QR ordering & subscription system",
   "scripts": {
     "build": "npm run build:client && npm run install:server",
@@ -10,9 +11,13 @@
     "start": "cd server && node server.js",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "generate:qr": "node scripts/generate-qr-codes.js"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4"
   }
 }

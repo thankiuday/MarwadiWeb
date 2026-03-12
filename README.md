@@ -13,7 +13,7 @@ A production-ready restaurant QR code ordering system built with the MERN stack.
 
 ## Features
 
-- **QR Table Detection** - `/table/1`, `/table/2`, `/table/3`
+- **QR Table Detection** - `/table/1`, `/table/2`, `/table/3` - Scan QR codes to auto-set table number
 - **Customer Flow** - Register/Login, browse menu, add to cart, place order, track status
 - **Admin (Cook)** - Real-time order list, accept/reject/update status
 - **Super Admin (Owner)** - Analytics dashboard, menu CRUD, admin management, subscription plans
@@ -57,6 +57,14 @@ cp .env.example .env
 npm install
 npm run dev
 ```
+
+### Generate Table QR Codes
+
+```bash
+npm run generate:qr
+```
+
+This creates `client/public/qr-codes/table-1.png`, `table-2.png`, `table-3.png`. Access the **QR Codes** page in the admin panel to view and print them for each table.
 
 ### Frontend Setup
 

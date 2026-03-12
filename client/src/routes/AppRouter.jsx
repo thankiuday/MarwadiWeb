@@ -19,6 +19,7 @@ import SubscriptionPlans from '../pages/customer/SubscriptionPlans';
 import MySubscriptions from '../pages/customer/MySubscriptions';
 import AdminOrders from '../pages/admin/AdminOrders';
 import AdminProfile from '../pages/admin/AdminProfile';
+import QRCodesPage from '../pages/admin/QRCodesPage';
 import SubscriptionSubscribers from '../pages/admin/SubscriptionSubscribers';
 import SADashboard from '../pages/superadmin/SADashboard';
 import SAMenu from '../pages/superadmin/SAMenu';
@@ -63,6 +64,10 @@ export default function AppRouter() {
         element={<RoleRoute roles={['admin']}><AdminProfile /></RoleRoute>}
       />
       <Route
+        path="/admin/qr-codes"
+        element={<RoleRoute roles={['admin', 'superadmin']}><QRCodesPage /></RoleRoute>}
+      />
+      <Route
         path="/superadmin/subscription-subscribers"
         element={<RoleRoute roles={['superadmin']}><SubscriptionSubscribers /></RoleRoute>}
       />
@@ -95,6 +100,10 @@ export default function AppRouter() {
       <Route
         path="/superadmin/profile"
         element={<RoleRoute roles={['superadmin']}><AdminProfile /></RoleRoute>}
+      />
+      <Route
+        path="/superadmin/qr-codes"
+        element={<RoleRoute roles={['superadmin']}><QRCodesPage /></RoleRoute>}
       />
 
       {/* Fallback */}

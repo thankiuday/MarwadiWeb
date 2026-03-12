@@ -10,6 +10,7 @@ import {
   HiOutlineArrowRightOnRectangle,
   HiOutlineBell,
   HiOutlineUserCircle,
+  HiOutlineQrCode,
   HiXMark,
   HiBell,
 } from 'react-icons/hi2';
@@ -19,6 +20,7 @@ import { useAdminNavbar } from '../../context/AdminNavbarContext';
 
 const adminLinks = [
   { to: '/admin/orders', icon: HiOutlineClipboardDocumentList, label: 'Orders' },
+  { to: '/admin/qr-codes', icon: HiOutlineQrCode, label: 'QR Codes' },
   { to: '/admin/subscription-subscribers', icon: HiOutlineUserGroup, label: 'Subscribers' },
   { to: '/admin/profile', icon: HiOutlineUserCircle, label: 'Profile' },
 ];
@@ -26,6 +28,7 @@ const adminLinks = [
 const superAdminLinks = [
   { to: '/superadmin/dashboard', icon: HiOutlineChartBarSquare, label: 'Dashboard' },
   { to: '/superadmin/orders', icon: HiOutlineClipboardDocumentList, label: 'Orders' },
+  { to: '/superadmin/qr-codes', icon: HiOutlineQrCode, label: 'QR Codes' },
   { to: '/superadmin/menu', icon: HiOutlineQueueList, label: 'Menu' },
   { to: '/superadmin/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/superadmin/subscriptions', icon: HiOutlineCreditCard, label: 'Subscriptions' },
