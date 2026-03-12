@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
 import RoleRoute from './RoleRoute';
+import CustomerRoute from './CustomerRoute';
 
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
@@ -37,18 +37,18 @@ export default function AppRouter() {
       <Route path="/register" element={<Register />} />
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      {/* Customer */}
-      <Route path="/menu" element={<ProtectedRoute><MenuPage /></ProtectedRoute>} />
-      <Route path="/menu/:id" element={<ProtectedRoute><MenuItemDetail /></ProtectedRoute>} />
-      <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-      <Route path="/order/:id" element={<ProtectedRoute><OrderStatus /></ProtectedRoute>} />
-      <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
-      <Route path="/bulk-order" element={<ProtectedRoute><BulkOrderPage /></ProtectedRoute>} />
-      <Route path="/bulk-order/:id" element={<ProtectedRoute><BulkOrderStatus /></ProtectedRoute>} />
-      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-      <Route path="/subscriptions/my" element={<ProtectedRoute><MySubscriptions /></ProtectedRoute>} />
-      <Route path="/subscriptions" element={<ProtectedRoute><SubscriptionPlans /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      {/* Customer - only customers can access (admins must use customer login for table orders) */}
+      <Route path="/menu" element={<CustomerRoute><MenuPage /></CustomerRoute>} />
+      <Route path="/menu/:id" element={<CustomerRoute><MenuItemDetail /></CustomerRoute>} />
+      <Route path="/cart" element={<CustomerRoute><CartPage /></CustomerRoute>} />
+      <Route path="/order/:id" element={<CustomerRoute><OrderStatus /></CustomerRoute>} />
+      <Route path="/orders" element={<CustomerRoute><OrderHistory /></CustomerRoute>} />
+      <Route path="/bulk-order" element={<CustomerRoute><BulkOrderPage /></CustomerRoute>} />
+      <Route path="/bulk-order/:id" element={<CustomerRoute><BulkOrderStatus /></CustomerRoute>} />
+      <Route path="/notifications" element={<CustomerRoute><NotificationsPage /></CustomerRoute>} />
+      <Route path="/subscriptions/my" element={<CustomerRoute><MySubscriptions /></CustomerRoute>} />
+      <Route path="/subscriptions" element={<CustomerRoute><SubscriptionPlans /></CustomerRoute>} />
+      <Route path="/profile" element={<CustomerRoute><ProfilePage /></CustomerRoute>} />
 
       {/* Admin */}
       <Route

@@ -7,20 +7,27 @@ export default function TableLanding() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  const { logout } = useAuth();
+
   useEffect(() => {
     const num = parseInt(tableNumber);
-    if (num >= 1 && num <= 3) {
-      localStorage.setItem('tableNumber', num);
-    }
+    const validTable = num >= 1 && num <= 3;
 
     if (loading) return;
 
-    if (user) {
+    if (user?.role === 'customer') {
+      if (validTable) localStorage.setItem('tableNumber', num);
       navigate('/menu', { replace: true });
     } else {
+      if (user) {
+        logout();
+        if (validTable) localStorage.setItem('tableNumber', num);
+      } else if (validTable) {
+        localStorage.setItem('tableNumber', num);
+      }
       navigate('/login', { replace: true });
     }
-  }, [tableNumber, user, loading, navigate]);
+  }, [tableNumber, user, loading, navigate, logout]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
