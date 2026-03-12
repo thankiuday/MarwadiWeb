@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { useCart } from '../../hooks/useCart';
 import { placeOrder } from '../../api/orders';
 import CustomerNavbar from '../../components/layout/CustomerNavbar';
@@ -35,7 +36,7 @@ export default function CartPage() {
       toast.success('Order placed successfully!');
       navigate(`/order/${data.data._id}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to place order');
+      toast.error(getApiError(err));
     } finally {
       setLoading(false);
     }

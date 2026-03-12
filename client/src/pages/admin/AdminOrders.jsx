@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getAllOrders, updateOrderStatus } from '../../api/orders';
 import { useSocket } from '../../hooks/useSocket';
 import AdminLayout from '../../components/layout/AdminLayout';
@@ -63,7 +64,7 @@ export default function AdminOrders() {
       );
       toast.success(`Order status updated to ${status}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update status');
+      toast.error(getApiError(err));
     }
   };
 

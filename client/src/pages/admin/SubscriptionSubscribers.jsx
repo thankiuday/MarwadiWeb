@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getUserSubscriptions } from '../../api/userSubscriptions';
 import { markMealDone } from '../../api/userSubscriptions';
 import AdminLayout from '../../components/layout/AdminLayout';
@@ -69,7 +70,7 @@ export default function SubscriptionSubscribers() {
         })
       );
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
+      toast.error(getApiError(err));
     } finally {
       setUpdating(null);
     }

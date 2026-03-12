@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getAllOrders, updateOrderStatus } from '../../api/orders';
 import { getAllBulkOrders, updateBulkOrderStatus } from '../../api/bulkOrders';
 import { useSocket } from '../../hooks/useSocket';
@@ -109,7 +110,7 @@ export default function SAOrders() {
       setOrders((prev) => prev.map((o) => (o._id === orderId ? data.data : o)));
       toast.success(`Status updated to ${status}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update');
+      toast.error(getApiError(err));
     }
   };
 
@@ -119,7 +120,7 @@ export default function SAOrders() {
       setBulkOrders((prev) => prev.map((o) => (o._id === orderId ? data.data : o)));
       toast.success(`Status updated to ${status}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update');
+      toast.error(getApiError(err));
     }
   };
 

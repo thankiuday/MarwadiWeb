@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import {
   getSubscriptions,
   createSubscription,
@@ -152,7 +153,7 @@ export default function SASubscriptions() {
       setShowModal(false);
       fetchPlans();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Save failed');
+      toast.error(getApiError(err));
     } finally {
       setSaving(false);
     }

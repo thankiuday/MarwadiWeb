@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import mongoSanitize from 'express-mongo-sanitize';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 
@@ -42,7 +41,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
-app.use(mongoSanitize());
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

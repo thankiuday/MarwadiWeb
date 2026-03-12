@@ -3,15 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { loginAdmin } from '../../api/auth';
 import { useAuth } from '../../hooks/useAuth';
+import { validateEmail, validatePassword } from '../../utils/validation';
+import { getApiError } from '../../utils/getApiError';
 
 export default function AdminLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleChange = (field, value) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const emailErr = validateEmail(form.email);
+    const passwordErr = validatePassword(form.password);
+    if (emailErr || passwordErr) {
+      setErrors({ email: emailErr, password: passwordErr });
+      return;
+    }
+    setErrors({});
     setLoading(true);
     try {
       const { data } = await loginAdmin(form);
@@ -23,7 +38,7 @@ export default function AdminLogin() {
         navigate('/admin/orders');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.error(getApiError(err));
     } finally {
       setLoading(false);
     }
@@ -44,23 +59,27 @@ export default function AdminLogin() {
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
             <input
               type="email"
-              required
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-base"
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-base text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                errors.email ? 'bg-red-900/50 border-red-500' : 'bg-gray-700 border-gray-600'
+              }`}
               placeholder="admin@restaurant.com"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-400">{errors.email}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
             <input
               type="password"
-              required
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all text-base"
+              onChange={(e) => handleChange('password', e.target.value)}
+              className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-base text-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                errors.password ? 'bg-red-900/50 border-red-500' : 'bg-gray-700 border-gray-600'
+              }`}
               placeholder="••••••••"
             />
+            {errors.password && <p className="mt-1 text-sm text-red-400">{errors.password}</p>}
           </div>
           <button
             type="submit"

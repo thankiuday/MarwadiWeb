@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getMenuItems } from '../../api/menu';
 import { placeBulkOrder } from '../../api/bulkOrders';
 import CustomerNavbar from '../../components/layout/CustomerNavbar';
@@ -17,6 +18,7 @@ export default function BulkOrderPage() {
   const [quantities, setQuantities] = useState({});
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -56,14 +58,15 @@ export default function BulkOrderPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!pickupDate) {
-      toast.error('Please select a pickup date');
+    const errs = {};
+    if (!pickupDate) errs.pickupDate = 'Please select a pickup date';
+    if (orderItems.length === 0) errs.items = 'Please add at least one item to your order';
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      toast.error('Please fix the errors below');
       return;
     }
-    if (orderItems.length === 0) {
-      toast.error('Please add at least one item');
-      return;
-    }
+    setErrors({});
 
     setSubmitting(true);
     try {
@@ -75,7 +78,7 @@ export default function BulkOrderPage() {
       toast.success('Bulk order placed successfully');
       navigate(`/bulk-order/${data.data._id}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to place bulk order');
+      toast.error(getApiError(err));
     } finally {
       setSubmitting(false);
     }
@@ -108,16 +111,21 @@ export default function BulkOrderPage() {
                 type="date"
                 id="pickup-date"
                 value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
+                onChange={(e) => {
+                  setPickupDate(e.target.value);
+                  if (errors.pickupDate) setErrors((prev) => ({ ...prev, pickupDate: null }));
+                }}
                 min={today}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-gray-900 [color-scheme:light]"
-                required
+                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-gray-900 [color-scheme:light] ${
+                  errors.pickupDate ? 'border-red-500 bg-red-50/50' : 'border-gray-200'
+                }`}
               />
-              {!pickupDate && (
+              {!pickupDate && !errors.pickupDate && (
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-base">
                   Select pickup date
                 </span>
               )}
+              {errors.pickupDate && <p className="mt-1 text-sm text-red-600">{errors.pickupDate}</p>}
             </div>
           </div>
 
@@ -125,6 +133,7 @@ export default function BulkOrderPage() {
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Select Items
             </label>
+            {errors.items && <p className="mb-2 text-sm text-red-600">{errors.items}</p>}
             {loading ? (
               <div className="space-y-2">
                 {Array.from({ length: 4 }).map((_, i) => (

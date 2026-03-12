@@ -4,13 +4,19 @@ import ApiError from '../utils/ApiError.js';
 export const createAdmin = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
+    if (!name?.trim()) throw new ApiError(400, 'Please enter the admin name');
+    if (!email?.trim()) throw new ApiError(400, 'Please enter the admin email');
+    if (!password) throw new ApiError(400, 'Please enter a password');
+    if (password.length < 6) throw new ApiError(400, 'Password must be at least 6 characters');
+    const emailNorm = String(email).trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(emailNorm)) throw new ApiError(400, 'Please enter a valid email address');
 
-    const exists = await Admin.findOne({ email });
-    if (exists) throw new ApiError(400, 'Email already registered');
+    const exists = await Admin.findOne({ email: emailNorm });
+    if (exists) throw new ApiError(400, 'This email is already in use.');
 
     const admin = await Admin.create({
-      name,
-      email,
+      name: name.trim(),
+      email: emailNorm,
       password,
       role: role || 'admin',
       createdBy: req.user._id,

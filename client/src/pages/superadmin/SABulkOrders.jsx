@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getAllBulkOrders, updateBulkOrderStatus } from '../../api/bulkOrders';
 import { useSocket } from '../../hooks/useSocket';
 import AdminLayout from '../../components/layout/AdminLayout';
@@ -60,7 +61,7 @@ export default function SABulkOrders() {
       setOrders((prev) => prev.map((o) => (o._id === orderId ? data.data : o)));
       toast.success(`Status updated to ${status}`);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update');
+      toast.error(getApiError(err));
     }
   };
 

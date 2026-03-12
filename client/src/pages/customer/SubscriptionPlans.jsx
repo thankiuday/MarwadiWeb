@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getSubscriptions } from '../../api/subscriptions';
 import { createUserSubscription } from '../../api/userSubscriptions';
 import CustomerNavbar from '../../components/layout/CustomerNavbar';
@@ -48,7 +49,7 @@ export default function SubscriptionPlans() {
       toast.success('Subscribed successfully!');
       navigate('/subscriptions/my');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Subscribe failed');
+      toast.error(getApiError(err));
     } finally {
       setSubscribingId(null);
     }

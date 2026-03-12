@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { getApiError } from '../../utils/getApiError';
 import { getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../../api/menu';
 import AdminLayout from '../../components/layout/AdminLayout';
 import AdminHeader from '../../components/layout/AdminHeader';
@@ -71,7 +72,7 @@ export default function SAMenu() {
       setShowModal(false);
       fetchItems();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Save failed');
+      toast.error(getApiError(err));
     } finally {
       setSaving(false);
     }
