@@ -29,6 +29,8 @@ const isProd = process.env.NODE_ENV === 'production';
 const app = express();
 const server = http.createServer(app);
 
+if (isProd) app.set('trust proxy', 1);
+
 initSocket(server);
 
 const corsOrigins = isProd && process.env.CLIENT_URL
