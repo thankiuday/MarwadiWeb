@@ -3,6 +3,9 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 
@@ -32,12 +35,21 @@ initSocket(server);
 const corsOrigins = isProd && process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map((o) => o.trim()).filter(Boolean)
   : [process.env.CLIENT_URL || 'http://localhost:5173'];
+app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
 app.use(cors({
   origin: corsOrigins.length ? corsOrigins : true,
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(mongoSanitize());
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many attempts. Try again later.' },
+});
+app.use('/api/auth', authLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);

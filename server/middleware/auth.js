@@ -33,6 +33,9 @@ export const protect = async (req, _res, next) => {
     if (error.name === 'JsonWebTokenError') {
       return next(new ApiError(401, 'Invalid token'));
     }
+    if (error.name === 'TokenExpiredError') {
+      return next(new ApiError(401, 'Token expired. Please sign in again.'));
+    }
     next(error);
   }
 };

@@ -1,17 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import PageLoader from '../components/ui/PageLoader';
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
+  if (loading) return <PageLoader />;
   if (!user) return <Navigate to="/login" replace />;
 
   return children;

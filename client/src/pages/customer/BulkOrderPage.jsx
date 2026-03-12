@@ -103,14 +103,22 @@ export default function BulkOrderPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Pickup Date
             </label>
-            <input
-              type="date"
-              value={pickupDate}
-              onChange={(e) => setPickupDate(e.target.value)}
-              min={today}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
-              required
-            />
+            <div className="relative">
+              <input
+                type="date"
+                id="pickup-date"
+                value={pickupDate}
+                onChange={(e) => setPickupDate(e.target.value)}
+                min={today}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all text-gray-900 [color-scheme:light]"
+                required
+              />
+              {!pickupDate && (
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-base">
+                  Select pickup date
+                </span>
+              )}
+            </div>
           </div>
 
           <div>

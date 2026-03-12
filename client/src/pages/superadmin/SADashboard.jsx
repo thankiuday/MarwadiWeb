@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 import {
   getSalesSummary,
@@ -15,6 +15,7 @@ import {
   PopularItemsPie,
   SubscriptionBarChart,
   PopularPlansPie,
+  OrdersByTableBar,
 } from '../../components/charts/AnalyticsChart';
 import { StatSkeleton } from '../../components/ui/SkeletonLoader';
 import { HiArrowDownTray, HiCalendarDays, HiChartBar, HiCreditCard } from 'react-icons/hi2';
@@ -35,9 +36,12 @@ export default function SADashboard() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('weekly');
   const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshTimeoutRef = useRef(null);
 
   const fetchData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
+    if (silent) setRefreshing(true);
     try {
       const [sumRes, chartRes, subSumRes, subChartRes] = await Promise.all([
         getSalesSummary(period),
@@ -53,6 +57,7 @@ export default function SADashboard() {
       if (!silent) toast.error('Failed to load analytics');
     } finally {
       if (!silent) setLoading(false);
+      if (silent) setRefreshing(false);
     }
   }, [period]);
 
@@ -63,9 +68,18 @@ export default function SADashboard() {
   useEffect(() => {
     if (!socket) return;
     const handlers = ['new_order', 'order_updated', 'new_bulk_order', 'bulk_order_updated', 'new_subscription'];
-    const onLiveUpdate = () => fetchData(true);
+    const onLiveUpdate = () => {
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = setTimeout(() => {
+        refreshTimeoutRef.current = null;
+        fetchData(true);
+      }, 500);
+    };
     handlers.forEach((ev) => socket.on(ev, onLiveUpdate));
-    return () => handlers.forEach((ev) => socket.off(ev, onLiveUpdate));
+    return () => {
+      handlers.forEach((ev) => socket.off(ev, onLiveUpdate));
+      if (refreshTimeoutRef.current) clearTimeout(refreshTimeoutRef.current);
+    };
   }, [socket, fetchData]);
 
   const handleExport = async (format) => {
@@ -87,9 +101,17 @@ export default function SADashboard() {
         <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-7xl mx-auto overflow-x-hidden">
           {/* Controls Section */}
           <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4">
-              View & Export
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3 sm:mb-4">
+              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                View & Export
+              </h2>
+              {socket?.connected && (
+                <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+                  <span className={`w-2 h-2 rounded-full ${refreshing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                  {refreshing ? 'Updating…' : 'Live'}
+                </span>
+              )}
+            </div>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <label className="text-sm font-medium text-slate-700">Period</label>
@@ -124,71 +146,100 @@ export default function SADashboard() {
             </div>
           </section>
 
-          {/* Stats Section */}
-          <section>
+          {/* Stats Section - Order Overview */}
+          <section className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4 flex items-center gap-2">
-              <HiChartBar className="w-4 h-4" />
-              Overview
+              <HiChartBar className="w-4 h-4 shrink-0" />
+              Order Overview
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 min-w-0">
               {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <StatSkeleton key={i} />)
+                Array.from({ length: 6 }).map((_, i) => <StatSkeleton key={i} />)
               ) : (
                 <>
-                  <StatsCard icon="📦" label="Total Orders" value={summary?.totalOrders || 0} color="orange" />
+                  <StatsCard icon="📦" label="Total Orders" labelShort="Orders" value={summary?.totalOrders || 0} color="orange" />
                   <StatsCard icon="✅" label="Completed" value={summary?.completedOrders || 0} color="green" />
                   <StatsCard icon="⏳" label="Pending" value={summary?.pendingOrders || 0} color="blue" />
+                  <StatsCard icon="❌" label="Rejected" value={summary?.rejectedOrders || 0} color="red" />
                   <StatsCard
                     icon="💰"
                     label="Revenue"
                     value={`₹${(summary?.totalRevenue || 0).toLocaleString()}`}
                     color="purple"
                   />
+                  <StatsCard
+                    icon="📊"
+                    label="Avg Order Value"
+                    labelShort="AOV"
+                    value={`₹${Math.round(summary?.averageOrderValue || 0).toLocaleString()}`}
+                    color="blue"
+                  />
                 </>
               )}
             </div>
           </section>
 
-          {/* Order Breakdown */}
+          {/* Order Breakdown & Status */}
           {!loading && (summary?.totalTableOrders > 0 || summary?.totalBulkOrders > 0) && (
-            <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100">
+            <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 min-w-0 overflow-hidden">
               <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <HiCalendarDays className="w-4 h-4" />
+                <HiCalendarDays className="w-4 h-4 shrink-0" />
                 Order Breakdown
               </h2>
-              <div className="flex flex-wrap gap-4 sm:gap-6">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  <span className="text-sm text-slate-600">Table orders</span>
+              <div className="flex flex-wrap gap-x-4 gap-y-3 sm:gap-6">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
+                  <span className="text-sm text-slate-600 whitespace-nowrap">Table orders</span>
                   <span className="text-sm font-bold text-slate-900">{summary?.totalTableOrders || 0}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-violet-500" />
-                  <span className="text-sm text-slate-600">Bulk orders</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-2 h-2 rounded-full bg-violet-500 shrink-0" />
+                  <span className="text-sm text-slate-600 whitespace-nowrap">Bulk orders</span>
                   <span className="text-sm font-bold text-slate-900">{summary?.totalBulkOrders || 0}</span>
                 </div>
+                {(summary?.acceptedOrders > 0 || summary?.preparingOrders > 0) && (
+                  <>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <span className="text-sm text-slate-600 whitespace-nowrap">Accepted</span>
+                      <span className="text-sm font-bold text-slate-900">{summary?.acceptedOrders || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
+                      <span className="text-sm text-slate-600 whitespace-nowrap">Preparing</span>
+                      <span className="text-sm font-bold text-slate-900">{summary?.preparingOrders || 0}</span>
+                    </div>
+                  </>
+                )}
               </div>
             </section>
           )}
 
           {/* Charts Section */}
-          <section>
+          <section className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4">
               Order Analytics
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <SalesBarChart data={chartData} />
-              <PopularItemsPie data={summary?.popularItems || []} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 min-w-0">
+              <div className="min-w-0">
+                <SalesBarChart data={chartData} />
+              </div>
+              <div className="min-w-0">
+                <PopularItemsPie data={summary?.popularItems || []} />
+              </div>
+              <div className="min-w-0 lg:col-span-2 xl:col-span-1">
+                <OrdersByTableBar data={summary?.ordersByTable || []} />
+              </div>
             </div>
           </section>
 
           {/* Subscription Analytics */}
-          <section>
+          <section className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4 flex items-center gap-2">
-              <HiCreditCard className="w-4 h-4" />
+              <HiCreditCard className="w-4 h-4 shrink-0" />
               Subscription Analytics
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-5 min-w-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-5 min-w-0 overflow-hidden">
               {loading ? (
                 Array.from({ length: 6 }).map((_, i) => <StatSkeleton key={`sub-${i}`} />)
               ) : (
@@ -225,9 +276,13 @@ export default function SADashboard() {
                 </>
               )}
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <SubscriptionBarChart data={subChartData} />
-              <PopularPlansPie data={subSummary?.popularPlans || []} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
+              <div className="min-w-0">
+                <SubscriptionBarChart data={subChartData} />
+              </div>
+              <div className="min-w-0">
+                <PopularPlansPie data={subSummary?.popularPlans || []} />
+              </div>
             </div>
           </section>
         </div>

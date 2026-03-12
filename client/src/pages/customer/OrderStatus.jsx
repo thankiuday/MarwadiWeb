@@ -7,6 +7,7 @@ import OrderStatusBadge from '../../components/orders/OrderStatusBadge';
 import CustomerNavbar from '../../components/layout/CustomerNavbar';
 import BottomNav from '../../components/layout/BottomNav';
 import Footer from '../../components/layout/Footer';
+import PageLoader from '../../components/ui/PageLoader';
 
 const STEPS = ['pending', 'accepted', 'preparing', 'completed'];
 
@@ -50,10 +51,10 @@ export default function OrderStatus() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center pb-20 md:pb-0">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      <>
+        <PageLoader />
         <BottomNav />
-      </div>
+      </>
     );
   }
 

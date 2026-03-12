@@ -16,8 +16,8 @@ const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b'
 
 export function SalesBarChart({ data }) {
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Daily Revenue</h3>
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 min-w-0 overflow-hidden">
+      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 break-words">Daily Revenue</h3>
       <div className="w-full h-[240px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
@@ -52,8 +52,8 @@ export function SalesBarChart({ data }) {
 
 export function SubscriptionBarChart({ data }) {
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">New Subscriptions</h3>
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 min-w-0 overflow-hidden">
+      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 break-words">New Subscriptions</h3>
       <div className="w-full h-[240px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
@@ -103,8 +103,8 @@ export function PopularPlansPie({ data }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Popular Plans</h3>
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 min-w-0 overflow-hidden">
+      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 break-words">Popular Plans</h3>
       <div className="w-full h-[260px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -133,9 +133,53 @@ export function PopularPlansPie({ data }) {
             />
             <Legend
               wrapperStyle={{ fontSize: 11 }}
-              formatter={(value) => <span className="text-gray-600 text-xs sm:text-sm">{value}</span>}
+              formatter={(value) => <span className="text-gray-600 text-xs sm:text-sm break-words">{value}</span>}
             />
           </PieChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+export function OrdersByTableBar({ data }) {
+  if (!data?.length) {
+    return (
+      <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Orders by Table</h3>
+        <div className="flex items-center justify-center h-[220px] sm:h-[280px] text-gray-400 text-sm">
+          No table orders in this period
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 min-w-0 overflow-hidden">
+      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 break-words">Orders by Table</h3>
+      <div className="w-full h-[220px] sm:h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+            <XAxis
+              dataKey="table"
+              tick={{ fontSize: 11, fill: '#64748b' }}
+            />
+            <YAxis
+              tick={{ fontSize: 10, fill: '#64748b' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                padding: '12px 16px',
+              }}
+              formatter={(value) => [value, 'Orders']}
+            />
+            <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} name="Orders" />
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
@@ -155,9 +199,9 @@ export function PopularItemsPie({ data }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 overflow-hidden">
-      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Popular Items</h3>
-      <div className="w-full h-[260px] sm:h-[300px]">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 min-w-0 overflow-hidden">
+      <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 break-words">Popular Items</h3>
+      <div className="w-full h-[260px] sm:h-[300px] min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -185,7 +229,7 @@ export function PopularItemsPie({ data }) {
             />
             <Legend
               wrapperStyle={{ fontSize: 11 }}
-              formatter={(value) => <span className="text-gray-600 text-xs sm:text-sm">{value}</span>}
+              formatter={(value) => <span className="text-gray-600 text-xs sm:text-sm break-words">{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>

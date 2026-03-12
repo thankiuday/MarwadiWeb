@@ -25,15 +25,39 @@ export const getSalesSummary = async (req, res, next) => {
     const orderMatch = { createdAt: { $gte: start, $lte: end } };
     const bulkMatch = { createdAt: { $gte: start, $lte: end } };
 
-    const [totalOrders, completedOrders, pendingOrders, totalBulkOrders, completedBulkOrders, pendingBulkOrders] =
-      await Promise.all([
-        Order.countDocuments(orderMatch),
-        Order.countDocuments({ ...orderMatch, status: 'completed' }),
-        Order.countDocuments({ ...orderMatch, status: 'pending' }),
-        BulkOrder.countDocuments(bulkMatch),
-        BulkOrder.countDocuments({ ...bulkMatch, status: 'completed' }),
-        BulkOrder.countDocuments({ ...bulkMatch, status: 'pending' }),
-      ]);
+    const [
+      totalOrders,
+      completedOrders,
+      pendingOrders,
+      rejectedOrders,
+      acceptedOrders,
+      preparingOrders,
+      totalBulkOrders,
+      completedBulkOrders,
+      pendingBulkOrders,
+      rejectedBulkOrders,
+      acceptedBulkOrders,
+      preparingBulkOrders,
+      ordersByTable,
+    ] = await Promise.all([
+      Order.countDocuments(orderMatch),
+      Order.countDocuments({ ...orderMatch, status: 'completed' }),
+      Order.countDocuments({ ...orderMatch, status: 'pending' }),
+      Order.countDocuments({ ...orderMatch, status: 'rejected' }),
+      Order.countDocuments({ ...orderMatch, status: 'accepted' }),
+      Order.countDocuments({ ...orderMatch, status: 'preparing' }),
+      BulkOrder.countDocuments(bulkMatch),
+      BulkOrder.countDocuments({ ...bulkMatch, status: 'completed' }),
+      BulkOrder.countDocuments({ ...bulkMatch, status: 'pending' }),
+      BulkOrder.countDocuments({ ...bulkMatch, status: 'rejected' }),
+      BulkOrder.countDocuments({ ...bulkMatch, status: 'accepted' }),
+      BulkOrder.countDocuments({ ...bulkMatch, status: 'preparing' }),
+      Order.aggregate([
+        { $match: orderMatch },
+        { $group: { _id: '$tableNumber', count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
+    ]);
 
     const [orderRevenue, bulkRevenue] = await Promise.all([
       Order.aggregate([
@@ -43,7 +67,7 @@ export const getSalesSummary = async (req, res, next) => {
             status: { $in: ['completed', 'accepted', 'preparing'] },
           },
         },
-        { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } },
       ]),
       BulkOrder.aggregate([
         {
@@ -52,11 +76,13 @@ export const getSalesSummary = async (req, res, next) => {
             status: { $in: ['completed', 'accepted', 'preparing'] },
           },
         },
-        { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+        { $group: { _id: null, total: { $sum: '$totalPrice' }, count: { $sum: 1 } } },
       ]),
     ]);
 
     const totalRevenue = (orderRevenue[0]?.total || 0) + (bulkRevenue[0]?.total || 0);
+    const revenueOrderCount = (orderRevenue[0]?.count || 0) + (bulkRevenue[0]?.count || 0);
+    const averageOrderValue = revenueOrderCount > 0 ? totalRevenue / revenueOrderCount : 0;
 
     const [orderPopular, bulkPopular] = await Promise.all([
       Order.aggregate([
@@ -99,6 +125,11 @@ export const getSalesSummary = async (req, res, next) => {
       .sort((a, b) => b.totalOrdered - a.totalOrdered)
       .slice(0, 10);
 
+    const ordersByTableFormatted = ordersByTable.map((t) => ({
+      table: `Table ${t._id}`,
+      count: t.count,
+    }));
+
     res.json({
       success: true,
       data: {
@@ -107,8 +138,13 @@ export const getSalesSummary = async (req, res, next) => {
         totalBulkOrders,
         completedOrders: completedOrders + completedBulkOrders,
         pendingOrders: pendingOrders + pendingBulkOrders,
+        rejectedOrders: rejectedOrders + rejectedBulkOrders,
+        acceptedOrders: acceptedOrders + acceptedBulkOrders,
+        preparingOrders: preparingOrders + preparingBulkOrders,
         totalRevenue,
+        averageOrderValue,
         popularItems,
+        ordersByTable: ordersByTableFormatted,
         period,
       },
     });

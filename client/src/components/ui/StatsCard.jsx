@@ -41,11 +41,11 @@ export default function StatsCard({ icon, label, labelShort, value, color = 'ora
           {icon}
         </div>
         <div className="min-w-0 flex-1 overflow-hidden">
-          <p className="text-xs sm:text-sm text-gray-500 font-medium line-clamp-2 break-words">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium break-words line-clamp-2">
             <span className="sm:hidden">{labelShort ?? label}</span>
             <span className="hidden sm:inline">{label}</span>
           </p>
-          <p className="text-base sm:text-2xl font-bold text-gray-900 mt-0.5 break-all">{value}</p>
+          <p className="text-base sm:text-xl lg:text-2xl font-bold text-gray-900 mt-0.5 break-all">{value}</p>
         </div>
       </div>
     </div>

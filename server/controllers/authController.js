@@ -6,11 +6,17 @@ import generateToken from '../utils/generateToken.js';
 export const registerCustomer = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
-
-    const exists = await User.findOne({ email });
+    if (!name?.trim() || !email?.trim() || !password) {
+      throw new ApiError(400, 'Name, email and password are required');
+    }
+    if (password.length < 6) {
+      throw new ApiError(400, 'Password must be at least 6 characters');
+    }
+    const emailNorm = String(email).trim().toLowerCase();
+    const exists = await User.findOne({ email: emailNorm });
     if (exists) throw new ApiError(400, 'Email already registered');
 
-    const user = await User.create({ name, email, password, phone });
+    const user = await User.create({ name: name.trim(), email: emailNorm, password, phone: phone?.trim() || '' });
 
     const token = generateToken({ id: user._id, role: user.role, accountType: 'customer' });
 
@@ -28,8 +34,8 @@ export const loginCustomer = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) throw new ApiError(400, 'Email and password are required');
-
-    const user = await User.findOne({ email }).select('+password');
+    const emailNorm = String(email).trim().toLowerCase();
+    const user = await User.findOne({ email: emailNorm }).select('+password');
     if (!user) throw new ApiError(401, 'Invalid credentials');
 
     const isMatch = await user.comparePassword(password);
@@ -51,8 +57,8 @@ export const loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) throw new ApiError(400, 'Email and password are required');
-
-    const admin = await Admin.findOne({ email }).select('+password');
+    const emailNorm = String(email).trim().toLowerCase();
+    const admin = await Admin.findOne({ email: emailNorm }).select('+password');
     if (!admin) throw new ApiError(401, 'Invalid credentials');
 
     const isMatch = await admin.comparePassword(password);

@@ -88,7 +88,7 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white flex flex-col z-50 transform transition-transform duration-300 ease-out ${
+        className={`fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white flex flex-col z-50 transform transition-transform duration-300 ease-out overflow-visible ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
@@ -99,9 +99,8 @@ export default function Sidebar() {
             </h1>
             <p className="text-xs text-gray-400 mt-1 capitalize">{user?.role} Panel</p>
           </div>
-          <div className="flex items-center gap-1">
-            <div ref={notifRef}>
-              <button
+          <div className="flex items-center gap-1 relative" ref={notifRef}>
+            <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -116,7 +115,6 @@ export default function Sidebar() {
                   </span>
                 )}
               </button>
-            </div>
             <button
               onClick={closeMobile}
               className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800"
@@ -125,42 +123,50 @@ export default function Sidebar() {
             </button>
           </div>
           {showNotifs && (
-            <div className="absolute left-0 right-0 top-full mt-2 w-full lg:left-auto lg:right-0 lg:w-80 xl:w-96 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-[70vh] overflow-y-auto z-[100]">
-                  <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
-                    <p className="text-xs font-semibold text-gray-400 uppercase">Notifications</p>
-                    {notifications.length > 0 && (
-                      <NavLink
-                        to={user?.role === 'superadmin' ? '/superadmin/notifications' : '/admin/orders'}
-                        onClick={() => { setShowNotifs(false); closeMobile(); }}
-                        className="text-xs text-orange-400 hover:text-orange-300 font-medium"
-                      >
-                        View all
-                      </NavLink>
-                    )}
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications</div>
-                  ) : (
-                    notifications.slice(0, 10).map((n) => (
-                      <div key={n.id} className="px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0">
-                        <p className="text-sm font-medium text-gray-200">{n.message}</p>
-                        {n.itemsSummary && (
-                          <p className="text-xs text-gray-400 mt-1 truncate" title={n.itemsSummary}>
-                            {n.itemsSummary}
-                          </p>
+            <div className="absolute left-0 right-0 top-full mt-2 w-full lg:left-full lg:right-auto lg:ml-2 lg:w-80 xl:w-96 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-[70vh] overflow-y-auto z-[100] min-w-[280px]">
+              <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
+                <p className="text-xs font-semibold text-gray-400 uppercase">Notifications</p>
+                {notifications.length > 0 && (
+                  <NavLink
+                    to={user?.role === 'superadmin' ? '/superadmin/notifications' : '/admin/orders'}
+                    onClick={() => { setShowNotifs(false); closeMobile(); }}
+                    className="text-xs text-orange-400 hover:text-orange-300 font-medium"
+                  >
+                    View all
+                  </NavLink>
+                )}
+              </div>
+              {notifications.length === 0 ? (
+                <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications</div>
+              ) : (
+                notifications.slice(0, 10).map((n) => {
+                  const ordersPath = user?.role === 'superadmin' ? '/superadmin/orders' : '/admin/orders';
+                  return (
+                    <NavLink
+                      key={n.id}
+                      to={ordersPath}
+                      onClick={() => { setShowNotifs(false); closeMobile(); }}
+                      className="block px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0 cursor-pointer transition-colors"
+                    >
+                      <p className="text-sm font-medium text-gray-200">{n.message}</p>
+                      {n.itemsSummary && (
+                        <p className="text-xs text-gray-400 mt-1 truncate" title={n.itemsSummary}>
+                          {n.itemsSummary}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs text-gray-500">
+                          {new Date(n.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                        {n.totalPrice != null && (
+                          <span className="text-xs font-semibold text-orange-400">₹{Number(n.totalPrice).toFixed(2)}</span>
                         )}
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-xs text-gray-500">
-                            {new Date(n.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                          {n.totalPrice != null && (
-                            <span className="text-xs font-semibold text-orange-400">₹{Number(n.totalPrice).toFixed(2)}</span>
-                          )}
-                        </div>
                       </div>
-                    ))
-                  )}
-                </div>
+                    </NavLink>
+                  );
+                })
+              )}
+            </div>
           )}
         </div>
 
