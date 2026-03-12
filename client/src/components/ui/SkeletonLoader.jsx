@@ -1,14 +1,14 @@
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm animate-pulse">
-      <div className="h-48 bg-gray-200" />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-3 bg-gray-200 rounded w-full" />
-        <div className="h-3 bg-gray-200 rounded w-1/2" />
+    <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm animate-pulse flex flex-col h-full">
+      <div className="aspect-square w-full bg-gray-200" />
+      <div className="p-2.5 sm:p-4 space-y-2 sm:space-y-3">
+        <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4" />
+        <div className="h-3 bg-gray-200 rounded w-full hidden sm:block" />
+        <div className="h-3 bg-gray-200 rounded w-1/2 hidden sm:block" />
         <div className="flex justify-between items-center pt-2">
-          <div className="h-5 bg-gray-200 rounded w-16" />
-          <div className="h-9 bg-gray-200 rounded-lg w-24" />
+          <div className="h-4 sm:h-5 bg-gray-200 rounded w-12 sm:w-16" />
+          <div className="h-8 sm:h-9 bg-gray-200 rounded-lg w-14 sm:w-24" />
         </div>
       </div>
     </div>

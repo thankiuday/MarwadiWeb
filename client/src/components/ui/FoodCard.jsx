@@ -8,8 +8,8 @@ export default function FoodCard({ item }) {
   const qty = cartItem?.quantity || 0;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-300 group flex sm:flex-col">
-      <Link to={`/menu/${item._id}`} className="relative w-24 h-24 sm:w-full sm:h-40 flex-shrink-0 sm:flex-shrink block">
+    <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-300 group flex flex-col h-full">
+      <Link to={`/menu/${item._id}`} className="relative block aspect-square w-full flex-shrink-0">
         {item.image ? (
           <img
             src={item.image}
@@ -29,37 +29,39 @@ export default function FoodCard({ item }) {
           </div>
         )}
       </Link>
-      <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between min-w-0">
-        <Link to={`/menu/${item._id}`} className="block min-w-0">
-          <h3 className="font-bold text-gray-900 text-base sm:text-lg truncate hover:text-orange-600 transition-colors">{item.name}</h3>
+      <div className="flex-1 p-2.5 sm:p-4 flex flex-col justify-between min-w-0">
+        <Link to={`/menu/${item._id}`} className="block min-w-0 flex-1">
+          <h3 className="font-bold text-gray-900 text-sm sm:text-lg truncate hover:text-orange-600 transition-colors leading-tight">
+            {item.name}
+          </h3>
           <p className="text-gray-500 text-xs sm:text-sm mt-0.5 line-clamp-2 hidden sm:block">
             {item.description || 'Delicious dish prepared with care'}
           </p>
         </Link>
-        <div className="flex items-center justify-between mt-2 sm:mt-3 gap-2">
-          <span className="text-lg sm:text-xl font-bold text-orange-600">₹{item.price}</span>
+        <div className="flex items-center justify-between mt-2 gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-base sm:text-xl font-bold text-orange-600">₹{item.price}</span>
           {item.available && (
-            <div className="flex items-center gap-1.5 sm:gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1 sm:gap-2" onClick={(e) => e.stopPropagation()}>
               {qty > 0 ? (
-                <div className="flex items-center gap-1.5 sm:gap-2 bg-orange-50 rounded-lg px-2 py-1">
+                <div className="flex items-center gap-1 sm:gap-2 bg-orange-50 rounded-lg px-1.5 py-0.5 sm:px-2 sm:py-1">
                   <button
                     onClick={(e) => { e.preventDefault(); updateQuantity(item._id, qty - 1); }}
-                    className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-md bg-white shadow-sm text-orange-600 hover:bg-orange-100 active:scale-90 transition-all touch-manipulation"
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-orange-600 hover:bg-orange-100 active:scale-90 transition-all touch-manipulation min-w-[28px] min-h-[28px]"
                   >
-                    <HiMinus className="w-4 h-4" />
+                    <HiMinus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
-                  <span className="w-6 text-center font-semibold text-gray-800 text-sm">{qty}</span>
+                  <span className="w-5 sm:w-6 text-center font-semibold text-gray-800 text-xs sm:text-sm">{qty}</span>
                   <button
                     onClick={(e) => { e.preventDefault(); addItem(item); }}
-                    className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-md bg-white shadow-sm text-orange-600 hover:bg-orange-100 active:scale-90 transition-all touch-manipulation"
+                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md bg-white shadow-sm text-orange-600 hover:bg-orange-100 active:scale-90 transition-all touch-manipulation min-w-[28px] min-h-[28px]"
                   >
-                    <HiPlus className="w-4 h-4" />
+                    <HiPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={(e) => { e.preventDefault(); addItem(item); }}
-                  className="px-4 py-2.5 sm:py-2 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 active:scale-95 transition-all text-sm touch-manipulation"
+                  className="px-3 py-2 sm:px-4 sm:py-2.5 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 active:scale-95 transition-all text-xs sm:text-sm touch-manipulation min-h-[36px]"
                 >
                   Add
                 </button>

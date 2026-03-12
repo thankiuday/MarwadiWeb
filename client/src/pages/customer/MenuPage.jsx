@@ -39,18 +39,18 @@ export default function MenuPage() {
       <BottomNav />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-5 py-4 sm:py-6">
+      <div className="flex-1 max-w-5xl mx-auto w-full px-3 sm:px-5 py-4 sm:py-6">
         {tableNumber && (
-          <div className="mb-4 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl text-sm text-orange-700 inline-block">
+          <div className="mb-3 sm:mb-4 px-3 py-2 bg-orange-50 border border-orange-200 rounded-xl text-sm text-orange-700 inline-block">
             Table <span className="font-bold">{tableNumber}</span>
           </div>
         )}
 
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Our Menu</h2>
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Our Menu</h2>
 
         <CategoryFilter activeCategory={activeCategory} onSelect={setActiveCategory} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
             : filtered.map((item) => <FoodCard key={item._id} item={item} />)}
