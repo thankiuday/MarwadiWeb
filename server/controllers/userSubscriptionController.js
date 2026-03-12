@@ -1,6 +1,7 @@
 import UserSubscription from '../models/UserSubscription.js';
 import Subscription from '../models/Subscription.js';
 import ApiError from '../utils/ApiError.js';
+import { getIO } from '../config/socket.js';
 
 const PLAN_SCHEDULE_POPULATE = [
   { path: 'weeklySchedule.sunday.lunch', model: 'Menu' },
@@ -60,6 +61,12 @@ export const createUserSubscription = async (req, res, next) => {
         populate: PLAN_SCHEDULE_POPULATE,
       })
       .populate('user', 'name email');
+
+    try {
+      getIO().to('superadmin_room').emit('new_subscription', populated);
+    } catch (e) {
+      console.warn('Socket emit failed:', e.message);
+    }
 
     res.status(201).json({ success: true, data: populated });
   } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import {
   getSalesSummary,
@@ -18,6 +18,7 @@ import {
 } from '../../components/charts/AnalyticsChart';
 import { StatSkeleton } from '../../components/ui/SkeletonLoader';
 import { HiArrowDownTray, HiCalendarDays, HiChartBar, HiCreditCard } from 'react-icons/hi2';
+import { useSocket } from '../../hooks/useSocket';
 
 const PERIOD_OPTIONS = [
   { value: 'weekly', label: 'Weekly' },
@@ -26,6 +27,7 @@ const PERIOD_OPTIONS = [
 ];
 
 export default function SADashboard() {
+  const { socket } = useSocket();
   const [summary, setSummary] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [subSummary, setSubSummary] = useState(null);
@@ -34,28 +36,37 @@ export default function SADashboard() {
   const [period, setPeriod] = useState('weekly');
   const [exporting, setExporting] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [sumRes, chartRes, subSumRes, subChartRes] = await Promise.all([
-          getSalesSummary(period),
-          getSalesChart(period),
-          getSubscriptionSummary(period),
-          getSubscriptionChart(period),
-        ]);
-        setSummary(sumRes.data.data);
-        setChartData(chartRes.data.data);
-        setSubSummary(subSumRes.data.data);
-        setSubChartData(subChartRes.data.data);
-      } catch {
-        toast.error('Failed to load analytics');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const [sumRes, chartRes, subSumRes, subChartRes] = await Promise.all([
+        getSalesSummary(period),
+        getSalesChart(period),
+        getSubscriptionSummary(period),
+        getSubscriptionChart(period),
+      ]);
+      setSummary(sumRes.data.data);
+      setChartData(chartRes.data.data);
+      setSubSummary(subSumRes.data.data);
+      setSubChartData(subChartRes.data.data);
+    } catch {
+      if (!silent) toast.error('Failed to load analytics');
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, [period]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handlers = ['new_order', 'order_updated', 'new_bulk_order', 'bulk_order_updated', 'new_subscription'];
+    const onLiveUpdate = () => fetchData(true);
+    handlers.forEach((ev) => socket.on(ev, onLiveUpdate));
+    return () => handlers.forEach((ev) => socket.off(ev, onLiveUpdate));
+  }, [socket, fetchData]);
 
   const handleExport = async (format) => {
     setExporting(true);
@@ -73,7 +84,7 @@ export default function SADashboard() {
     <AdminLayout>
       <AdminHeader title="Dashboard" />
       <div className="min-h-screen bg-slate-50/80 pb-8 sm:pb-10">
-        <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-7xl mx-auto">
+        <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 max-w-7xl mx-auto overflow-x-hidden">
           {/* Controls Section */}
           <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4">
@@ -177,7 +188,7 @@ export default function SADashboard() {
               <HiCreditCard className="w-4 h-4" />
               Subscription Analytics
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-5 min-w-0">
               {loading ? (
                 Array.from({ length: 6 }).map((_, i) => <StatSkeleton key={`sub-${i}`} />)
               ) : (
@@ -187,12 +198,14 @@ export default function SADashboard() {
                   <StatsCard
                     icon="👥"
                     label="Active Subscribers"
+                    labelShort="Subscribers"
                     value={subSummary?.totalActiveSubscribers || 0}
                     color="purple"
                   />
                   <StatsCard
                     icon="🆕"
                     label={`New (${period})`}
+                    labelShort={`New (${period})`}
                     value={subSummary?.newSubscribersInPeriod || 0}
                     color="orange"
                   />
@@ -205,6 +218,7 @@ export default function SADashboard() {
                   <StatsCard
                     icon="📈"
                     label={`New Rev (${period})`}
+                    labelShort="New Rev"
                     value={`₹${(subSummary?.newSubscriptionRevenue || 0).toLocaleString()}`}
                     color="green"
                   />

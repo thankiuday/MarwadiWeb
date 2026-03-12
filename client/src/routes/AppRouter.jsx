@@ -14,15 +14,18 @@ import OrderHistory from '../pages/customer/OrderHistory';
 import BulkOrderPage from '../pages/customer/BulkOrderPage';
 import BulkOrderStatus from '../pages/customer/BulkOrderStatus';
 import NotificationsPage from '../pages/customer/NotificationsPage';
+import ProfilePage from '../pages/customer/ProfilePage';
 import SubscriptionPlans from '../pages/customer/SubscriptionPlans';
 import MySubscriptions from '../pages/customer/MySubscriptions';
 import AdminOrders from '../pages/admin/AdminOrders';
+import AdminProfile from '../pages/admin/AdminProfile';
 import SubscriptionSubscribers from '../pages/admin/SubscriptionSubscribers';
 import SADashboard from '../pages/superadmin/SADashboard';
 import SAMenu from '../pages/superadmin/SAMenu';
 import SAAdmins from '../pages/superadmin/SAAdmins';
 import SASubscriptions from '../pages/superadmin/SASubscriptions';
 import SAOrders from '../pages/superadmin/SAOrders';
+import SANotifications from '../pages/superadmin/SANotifications';
 
 export default function AppRouter() {
   return (
@@ -44,6 +47,7 @@ export default function AppRouter() {
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/subscriptions/my" element={<ProtectedRoute><MySubscriptions /></ProtectedRoute>} />
       <Route path="/subscriptions" element={<ProtectedRoute><SubscriptionPlans /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
       {/* Admin */}
       <Route
@@ -53,6 +57,10 @@ export default function AppRouter() {
       <Route
         path="/admin/subscription-subscribers"
         element={<RoleRoute roles={['admin', 'superadmin']}><SubscriptionSubscribers /></RoleRoute>}
+      />
+      <Route
+        path="/admin/profile"
+        element={<RoleRoute roles={['admin']}><AdminProfile /></RoleRoute>}
       />
       <Route
         path="/superadmin/subscription-subscribers"
@@ -79,6 +87,14 @@ export default function AppRouter() {
       <Route
         path="/superadmin/orders"
         element={<RoleRoute roles={['superadmin']}><SAOrders /></RoleRoute>}
+      />
+      <Route
+        path="/superadmin/notifications"
+        element={<RoleRoute roles={['superadmin']}><SANotifications /></RoleRoute>}
+      />
+      <Route
+        path="/superadmin/profile"
+        element={<RoleRoute roles={['superadmin']}><AdminProfile /></RoleRoute>}
       />
 
       {/* Fallback */}

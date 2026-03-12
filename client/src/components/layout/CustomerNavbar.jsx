@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { HiOutlineHome, HiOutlineShoppingBag, HiOutlineClipboardDocumentList, HiOutlineCube, HiOutlineCreditCard, HiOutlineArrowRightOnRectangle, HiOutlineBell } from 'react-icons/hi2';
+import { HiOutlineHome, HiOutlineShoppingBag, HiOutlineClipboardDocumentList, HiOutlineCube, HiOutlineCreditCard, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlineUserCircle } from 'react-icons/hi2';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
 import { useNotifications } from '../../hooks/useNotifications';
@@ -50,6 +50,10 @@ export default function CustomerNavbar({ onCartOpen }) {
               <HiOutlineCreditCard className="w-5 h-5" />
               Subscriptions
             </NavLink>
+            <NavLink to="/profile" className={({ isActive }) => navLinkClass(isActive)}>
+              <HiOutlineUserCircle className="w-5 h-5" />
+              Profile
+            </NavLink>
             <NavLink to="/notifications" className={({ isActive }) => navLinkClass(isActive)}>
               <span className="relative">
                 <HiOutlineBell className="w-5 h-5" />
@@ -79,7 +83,12 @@ export default function CustomerNavbar({ onCartOpen }) {
         <div className="flex items-center gap-1 sm:gap-2">
           {user?.role === 'customer' && (
             <>
-              {/* Mobile: Notifications icon only */}
+              <Link
+                to="/profile"
+                className="md:hidden w-11 h-11 flex items-center justify-center rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+              >
+                <HiOutlineUserCircle className="w-5 h-5 text-gray-600" />
+              </Link>
               <Link
                 to="/notifications"
                 className="md:hidden relative w-11 h-11 flex items-center justify-center rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"

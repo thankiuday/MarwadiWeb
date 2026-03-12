@@ -8,6 +8,8 @@ import {
   HiOutlineCreditCard,
   HiOutlineUserGroup,
   HiOutlineArrowRightOnRectangle,
+  HiOutlineBell,
+  HiOutlineUserCircle,
   HiXMark,
   HiBell,
 } from 'react-icons/hi2';
@@ -18,15 +20,18 @@ import { useAdminNavbar } from '../../context/AdminNavbarContext';
 const adminLinks = [
   { to: '/admin/orders', icon: HiOutlineClipboardDocumentList, label: 'Orders' },
   { to: '/admin/subscription-subscribers', icon: HiOutlineUserGroup, label: 'Subscribers' },
+  { to: '/admin/profile', icon: HiOutlineUserCircle, label: 'Profile' },
 ];
 
 const superAdminLinks = [
   { to: '/superadmin/dashboard', icon: HiOutlineChartBarSquare, label: 'Dashboard' },
   { to: '/superadmin/orders', icon: HiOutlineClipboardDocumentList, label: 'Orders' },
+  { to: '/superadmin/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/superadmin/menu', icon: HiOutlineQueueList, label: 'Menu' },
   { to: '/superadmin/admins', icon: HiOutlineUsers, label: 'Admins' },
   { to: '/superadmin/subscriptions', icon: HiOutlineCreditCard, label: 'Subscriptions' },
   { to: '/superadmin/subscription-subscribers', icon: HiOutlineUserGroup, label: 'Subscribers' },
+  { to: '/superadmin/profile', icon: HiOutlineUserCircle, label: 'Profile' },
 ];
 
 export default function Sidebar() {
@@ -97,9 +102,7 @@ export default function Sidebar() {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const next = !showNotifs;
-                  setShowNotifs(next);
-                  if (next && notifications.length > 0) clearNotifications();
+                  setShowNotifs((prev) => !prev);
                 }}
                 className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800 transition-colors"
               >
@@ -111,19 +114,40 @@ export default function Sidebar() {
                 )}
               </button>
               {showNotifs && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-64 overflow-y-auto z-[100]">
-                  <div className="px-3 py-2 border-b border-gray-700">
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-[70vh] overflow-y-auto z-[100]">
+                  <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-400 uppercase">Notifications</p>
+                    {notifications.length > 0 && (
+                      <NavLink
+                        to={user?.role === 'superadmin' ? '/superadmin/notifications' : '/admin/orders'}
+                        onClick={() => { setShowNotifs(false); closeMobile(); }}
+                        className="text-xs text-orange-400 hover:text-orange-300 font-medium"
+                      >
+                        View all
+                      </NavLink>
+                    )}
                   </div>
                   {notifications.length === 0 ? (
                     <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications</div>
                   ) : (
-                  notifications.slice(0, 10).map((n) => (
-                    <div key={n.id} className="px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0">
-                      <p className="text-sm text-gray-200">{n.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{n.time}</p>
-                    </div>
-                  ))
+                    notifications.slice(0, 10).map((n) => (
+                      <div key={n.id} className="px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0">
+                        <p className="text-sm font-medium text-gray-200">{n.message}</p>
+                        {n.itemsSummary && (
+                          <p className="text-xs text-gray-400 mt-1 truncate" title={n.itemsSummary}>
+                            {n.itemsSummary}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-gray-500">
+                            {new Date(n.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          {n.totalPrice != null && (
+                            <span className="text-xs font-semibold text-orange-400">₹{Number(n.totalPrice).toFixed(2)}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               )}
@@ -158,15 +182,19 @@ export default function Sidebar() {
         </nav>
 
         <div className="p-4 border-t border-gray-800">
-          <div className="flex items-center gap-3 px-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold">
+          <NavLink
+            to={user?.role === 'superadmin' ? '/superadmin/profile' : '/admin/profile'}
+            onClick={closeMobile}
+            className="flex items-center gap-3 px-3 mb-4 py-2 rounded-xl hover:bg-gray-800 transition-colors"
+          >
+            <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold shrink-0">
               {user?.name?.[0]?.toUpperCase()}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium truncate">{user?.name}</p>
               <p className="text-xs text-gray-400 truncate">{user?.email}</p>
             </div>
-          </div>
+          </NavLink>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition-all"

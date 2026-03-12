@@ -17,8 +17,19 @@ export function AdminNotificationsProvider({ children }) {
 
     const handleNewOrder = (order) => {
       const msg = `New order from Table ${order.tableNumber}`;
+      const itemsSummary = order.items?.map((i) => `${i.name} x${i.quantity}`).join(', ') || '';
       setNotifications((prev) => [
-        { id: `order-${order._id}-${Date.now()}`, message: msg, time: new Date().toLocaleTimeString(), type: 'order' },
+        {
+          id: `order-${order._id}-${Date.now()}`,
+          message: msg,
+          time: new Date().toISOString(),
+          type: 'order',
+          order,
+          orderId: order._id,
+          itemsSummary: itemsSummary.slice(0, 80) + (itemsSummary.length > 80 ? '...' : ''),
+          totalPrice: order.totalPrice,
+          tableNumber: order.tableNumber,
+        },
         ...prev,
       ]);
       toast.info(msg, { autoClose: 5000 });
@@ -27,8 +38,36 @@ export function AdminNotificationsProvider({ children }) {
     const handleNewBulkOrder = (order) => {
       const name = order.userId?.name || 'Customer';
       const msg = `New bulk order from ${name}`;
+      const itemsSummary = order.items?.map((i) => `${i.name} x${i.quantity}`).join(', ') || '';
       setNotifications((prev) => [
-        { id: `bulk-${order._id}-${Date.now()}`, message: msg, time: new Date().toLocaleTimeString(), type: 'bulk' },
+        {
+          id: `bulk-${order._id}-${Date.now()}`,
+          message: msg,
+          time: new Date().toISOString(),
+          type: 'bulk',
+          order,
+          orderId: order._id,
+          itemsSummary: itemsSummary.slice(0, 80) + (itemsSummary.length > 80 ? '...' : ''),
+          totalPrice: order.totalPrice,
+          customerName: name,
+        },
+        ...prev,
+      ]);
+      toast.info(msg, { autoClose: 5000 });
+    };
+
+    const handleNewSubscription = (sub) => {
+      const planName = sub.plan?.name || 'Plan';
+      const userName = sub.user?.name || 'Customer';
+      const msg = `New subscription: ${userName} → ${planName}`;
+      setNotifications((prev) => [
+        {
+          id: `sub-${sub._id}-${Date.now()}`,
+          message: msg,
+          time: new Date().toISOString(),
+          type: 'subscription',
+          subscription: sub,
+        },
         ...prev,
       ]);
       toast.info(msg, { autoClose: 5000 });
@@ -37,11 +76,13 @@ export function AdminNotificationsProvider({ children }) {
     socket.on('new_order', handleNewOrder);
     if (user?.role === 'superadmin') {
       socket.on('new_bulk_order', handleNewBulkOrder);
+      socket.on('new_subscription', handleNewSubscription);
     }
 
     return () => {
       socket.off('new_order', handleNewOrder);
       socket.off('new_bulk_order', handleNewBulkOrder);
+      socket.off('new_subscription', handleNewSubscription);
     };
   }, [socket, isAdmin, user?.role]);
 
@@ -51,8 +92,10 @@ export function AdminNotificationsProvider({ children }) {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const unreadCount = notifications.length;
+
   return (
-    <AdminNotificationsContext.Provider value={{ notifications, clearNotifications, markAsRead }}>
+    <AdminNotificationsContext.Provider value={{ notifications, clearNotifications, markAsRead, unreadCount }}>
       {children}
     </AdminNotificationsContext.Provider>
   );
@@ -60,5 +103,5 @@ export function AdminNotificationsProvider({ children }) {
 
 export function useAdminNotifications() {
   const ctx = useContext(AdminNotificationsContext);
-  return ctx || { notifications: [], clearNotifications: () => {}, markAsRead: () => {} };
+  return ctx || { notifications: [], clearNotifications: () => {}, markAsRead: () => {}, unreadCount: 0 };
 }

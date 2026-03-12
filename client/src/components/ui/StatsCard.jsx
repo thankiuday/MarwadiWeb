@@ -1,4 +1,4 @@
-export default function StatsCard({ icon, label, value, color = 'orange' }) {
+export default function StatsCard({ icon, label, labelShort, value, color = 'orange' }) {
   const colorConfig = {
     orange: {
       bg: 'bg-orange-500/10',
@@ -35,14 +35,17 @@ export default function StatsCard({ icon, label, value, color = 'orange' }) {
   const config = colorConfig[color] || colorConfig.orange;
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200/80 transition-all duration-200">
+    <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-gray-200/80 transition-all duration-200 min-w-0 overflow-hidden">
       <div className="flex items-start gap-3 sm:gap-4">
-        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl shrink-0 ${config.bg} ${config.text}`}>
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-2xl shrink-0 ${config.bg} ${config.text}`}>
           {icon}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs sm:text-sm text-gray-500 font-medium truncate">{label}</p>
-          <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 truncate">{value}</p>
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium line-clamp-2 break-words">
+            <span className="sm:hidden">{labelShort ?? label}</span>
+            <span className="hidden sm:inline">{label}</span>
+          </p>
+          <p className="text-base sm:text-2xl font-bold text-gray-900 mt-0.5 break-all">{value}</p>
         </div>
       </div>
     </div>
