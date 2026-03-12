@@ -26,11 +26,11 @@ const adminLinks = [
 const superAdminLinks = [
   { to: '/superadmin/dashboard', icon: HiOutlineChartBarSquare, label: 'Dashboard' },
   { to: '/superadmin/orders', icon: HiOutlineClipboardDocumentList, label: 'Orders' },
-  { to: '/superadmin/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/superadmin/menu', icon: HiOutlineQueueList, label: 'Menu' },
-  { to: '/superadmin/admins', icon: HiOutlineUsers, label: 'Admins' },
+  { to: '/superadmin/notifications', icon: HiOutlineBell, label: 'Notifications' },
   { to: '/superadmin/subscriptions', icon: HiOutlineCreditCard, label: 'Subscriptions' },
   { to: '/superadmin/subscription-subscribers', icon: HiOutlineUserGroup, label: 'Subscribers' },
+  { to: '/superadmin/admins', icon: HiOutlineUsers, label: 'Admins' },
   { to: '/superadmin/profile', icon: HiOutlineUserCircle, label: 'Profile' },
 ];
 
@@ -89,7 +89,7 @@ export default function Sidebar() {
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
-        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-800">
+        <div className="relative flex items-center justify-between p-4 lg:p-6 border-b border-gray-800">
           <div>
             <h1 className="text-xl font-bold">
               <span className="text-orange-400">King's</span> Restaurant
@@ -97,14 +97,14 @@ export default function Sidebar() {
             <p className="text-xs text-gray-400 mt-1 capitalize">{user?.role} Panel</p>
           </div>
           <div className="flex items-center gap-1">
-            <div className="relative" ref={notifRef}>
+            <div ref={notifRef}>
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNotifs((prev) => !prev);
                 }}
-                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800 transition-colors"
+                className="relative w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800 transition-colors"
               >
                 <HiBell className="w-5 h-5 text-gray-400" />
                 {notifications.length > 0 && (
@@ -113,8 +113,16 @@ export default function Sidebar() {
                   </span>
                 )}
               </button>
-              {showNotifs && (
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-[70vh] overflow-y-auto z-[100]">
+            </div>
+            <button
+              onClick={closeMobile}
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800"
+            >
+              <HiXMark className="w-6 h-6" />
+            </button>
+          </div>
+          {showNotifs && (
+            <div className="absolute left-0 right-0 top-full mt-2 w-full lg:left-auto lg:right-0 lg:w-80 xl:w-96 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 max-h-[70vh] overflow-y-auto z-[100]">
                   <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-400 uppercase">Notifications</p>
                     {notifications.length > 0 && (
@@ -150,15 +158,7 @@ export default function Sidebar() {
                     ))
                   )}
                 </div>
-              )}
-            </div>
-            <button
-              onClick={closeMobile}
-              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-800"
-            >
-              <HiXMark className="w-6 h-6" />
-            </button>
-          </div>
+          )}
         </div>
 
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">

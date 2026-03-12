@@ -31,39 +31,12 @@ export default function CustomerNavbar({ onCartOpen }) {
           <span className="text-orange-500">King's</span> Restaurant
         </Link>
 
-        {/* Desktop: Nav bar with Menu, Orders, Notifications, Cart */}
+        {/* Desktop: Nav bar - Menu, Cart, Orders, Bulk Order, Subscriptions, Notifications, Profile */}
         {user?.role === 'customer' && (
           <nav className="hidden md:flex items-center gap-1">
             <NavLink to="/menu" className={({ isActive }) => navLinkClass(isActive)}>
               <HiOutlineHome className="w-5 h-5" />
               Menu
-            </NavLink>
-            <NavLink to="/orders" className={() => navLinkClass(isOrdersActive)}>
-              <HiOutlineClipboardDocumentList className="w-5 h-5" />
-              Orders
-            </NavLink>
-            <NavLink to="/bulk-order" className={() => navLinkClass(isBulkOrderActive)}>
-              <HiOutlineCube className="w-5 h-5" />
-              Bulk Order
-            </NavLink>
-            <NavLink to="/subscriptions" className={() => navLinkClass(isSubscriptionsActive)}>
-              <HiOutlineCreditCard className="w-5 h-5" />
-              Subscriptions
-            </NavLink>
-            <NavLink to="/profile" className={({ isActive }) => navLinkClass(isActive)}>
-              <HiOutlineUserCircle className="w-5 h-5" />
-              Profile
-            </NavLink>
-            <NavLink to="/notifications" className={({ isActive }) => navLinkClass(isActive)}>
-              <span className="relative">
-                <HiOutlineBell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-orange-500 text-white text-[10px] font-bold rounded-full">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </span>
-              Notifications
             </NavLink>
             <button
               onClick={onCartOpen}
@@ -77,6 +50,33 @@ export default function CustomerNavbar({ onCartOpen }) {
                 </span>
               )}
             </button>
+            <NavLink to="/orders" className={() => navLinkClass(isOrdersActive)}>
+              <HiOutlineClipboardDocumentList className="w-5 h-5" />
+              Orders
+            </NavLink>
+            <NavLink to="/bulk-order" className={() => navLinkClass(isBulkOrderActive)}>
+              <HiOutlineCube className="w-5 h-5" />
+              Bulk Order
+            </NavLink>
+            <NavLink to="/subscriptions" className={() => navLinkClass(isSubscriptionsActive)}>
+              <HiOutlineCreditCard className="w-5 h-5" />
+              Subscriptions
+            </NavLink>
+            <NavLink to="/notifications" className={({ isActive }) => navLinkClass(isActive)}>
+              <span className="relative">
+                <HiOutlineBell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-orange-500 text-white text-[10px] font-bold rounded-full">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </span>
+              Notifications
+            </NavLink>
+            <NavLink to="/profile" className={({ isActive }) => navLinkClass(isActive)}>
+              <HiOutlineUserCircle className="w-5 h-5" />
+              Profile
+            </NavLink>
           </nav>
         )}
 
