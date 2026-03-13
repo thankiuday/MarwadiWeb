@@ -1,11 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
 
+const HIDE_ON_MOBILE_PATHS = ['/cart', '/orders', '/bulk-order', '/subscriptions'];
+
 export default function Footer() {
   const location = useLocation();
   const isProfilePage = location.pathname === '/profile';
+  const hideOnMobile = HIDE_ON_MOBILE_PATHS.some(
+    (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+  );
 
   return (
-    <footer className="block w-full bg-gray-900 text-gray-400 py-6 sm:py-8 md:py-10 mt-auto shrink-0 pb-20 md:pb-10">
+    <footer className={`w-full bg-gray-900 text-gray-400 py-6 sm:py-8 md:py-10 mt-auto shrink-0 pb-20 md:pb-10 ${hideOnMobile ? 'hidden md:block' : 'block'}`}>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">

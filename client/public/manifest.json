@@ -9,7 +9,7 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/vite.svg",
+      "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
@@ -21,14 +21,14 @@
       "short_name": "Order",
       "description": "Browse menu and place orders",
       "url": "/menu",
-      "icons": [{ "src": "/vite.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Admin Panel",
       "short_name": "Admin",
       "description": "Admin and Superadmin dashboard",
       "url": "/admin/login",
-      "icons": [{ "src": "/vite.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "categories": ["food", "lifestyle", "shopping"]

@@ -2,7 +2,7 @@ const CACHE_NAME = 'kings-restaurant-v1';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(['/', '/manifest.json', '/vite.svg']))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(['/', '/manifest.json', '/icon.svg']))
   );
   self.skipWaiting();
 });
