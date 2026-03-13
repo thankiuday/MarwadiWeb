@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import ApiError from '../utils/ApiError.js';
 import { getIO } from '../config/socket.js';
+import { sendPushToAdmins, sendPushToUser } from '../utils/pushNotifications.js';
 
 export const placeOrder = async (req, res, next) => {
   try {
@@ -23,6 +24,9 @@ export const placeOrder = async (req, res, next) => {
 
     const io = getIO();
     io.to('admin_room').emit('new_order', populated);
+
+    const itemsPreview = populated.items?.slice(0, 2).map((i) => `${i.name} x${i.quantity}`).join(', ') || 'Order';
+    await sendPushToAdmins('New order arrive', `Table ${tableNumber}: ${itemsPreview}`, '/admin/orders');
 
     res.status(201).json({ success: true, data: populated });
   } catch (error) {
@@ -81,6 +85,14 @@ export const updateOrderStatus = async (req, res, next) => {
       status: order.status,
     });
     io.to('admin_room').emit('order_updated', populated);
+
+    const statusMessages = {
+      accepted: 'Your order has been accepted!',
+      preparing: 'Your order is being prepared!',
+      completed: 'Your order is ready!',
+      rejected: 'Your order was rejected.',
+    };
+    await sendPushToUser(order.userId, 'Order update', statusMessages[order.status] || `Status: ${order.status}`, '/orders');
 
     res.json({ success: true, data: populated });
   } catch (error) {

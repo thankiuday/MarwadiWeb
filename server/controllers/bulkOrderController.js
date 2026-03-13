@@ -2,6 +2,7 @@ import BulkOrder from '../models/BulkOrder.js';
 import Menu from '../models/Menu.js';
 import ApiError from '../utils/ApiError.js';
 import { getIO } from '../config/socket.js';
+import { sendPushToAdmins, sendPushToUser } from '../utils/pushNotifications.js';
 
 export const placeBulkOrder = async (req, res, next) => {
   try {
@@ -52,6 +53,9 @@ export const placeBulkOrder = async (req, res, next) => {
 
     const io = getIO();
     io.to('superadmin_room').emit('new_bulk_order', populated);
+
+    const customerName = populated.userId?.name || 'Customer';
+    await sendPushToAdmins('New bulk order', `${customerName} placed a bulk order`, '/superadmin/orders');
 
     res.status(201).json({ success: true, data: populated });
   } catch (error) {
@@ -113,6 +117,20 @@ export const updateBulkOrderStatus = async (req, res, next) => {
       order: populated,
     });
     io.to('superadmin_room').emit('bulk_order_updated', populated);
+
+    const statusMessages = {
+      accepted: 'Your bulk order has been accepted!',
+      preparing: 'Your bulk order is being prepared!',
+      completed: 'Your bulk order is ready for pickup!',
+      rejected: 'Your bulk order was rejected.',
+    };
+    const message = statusMessages[order.status] || `Bulk order status: ${order.status}`;
+    await sendPushToUser(
+      order.userId,
+      'Bulk order update',
+      message,
+      `/bulk-order/${order._id}`
+    );
 
     res.json({ success: true, data: populated });
   } catch (error) {
