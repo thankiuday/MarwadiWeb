@@ -149,6 +149,69 @@ export const getSalesSummary = async (req, res, next) => {
     const repeatCustomers = Array.from(customerOrderMap.values()).filter((n) => n >= 2).length;
     const repeatOrderRate = totalUniqueCustomers > 0 ? (repeatCustomers / totalUniqueCustomers) * 100 : 0;
 
+    const [orderCustomersWithDetails, bulkCustomersWithDetails] = await Promise.all([
+      Order.aggregate([
+        { $match: orderMatch },
+        {
+          $group: {
+            _id: '$userId',
+            orderCount: { $sum: 1 },
+            totalSpent: { $sum: '$totalPrice' },
+          },
+        },
+        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            name: { $ifNull: ['$user.name', 'Guest'] },
+            email: { $ifNull: ['$user.email', '-'] },
+            orderCount: 1,
+            totalSpent: 1,
+          },
+        },
+      ]),
+      BulkOrder.aggregate([
+        { $match: bulkMatch },
+        {
+          $group: {
+            _id: '$userId',
+            orderCount: { $sum: 1 },
+            totalSpent: { $sum: '$totalPrice' },
+          },
+        },
+        { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            name: { $ifNull: ['$user.name', 'Guest'] },
+            email: { $ifNull: ['$user.email', '-'] },
+            orderCount: 1,
+            totalSpent: 1,
+          },
+        },
+      ]),
+    ]);
+
+    const regularCustomerMap = new Map();
+    for (const c of [...orderCustomersWithDetails, ...bulkCustomersWithDetails]) {
+      const key = String(c._id);
+      const existing = regularCustomerMap.get(key);
+      if (existing) {
+        existing.orderCount += c.orderCount;
+        existing.totalSpent += c.totalSpent;
+      } else {
+        regularCustomerMap.set(key, {
+          name: c.name,
+          email: c.email,
+          orderCount: c.orderCount,
+          totalSpent: c.totalSpent,
+        });
+      }
+    }
+    const regularCustomers = Array.from(regularCustomerMap.values())
+      .sort((a, b) => b.orderCount - a.orderCount)
+      .slice(0, 20);
+
     res.json({
       success: true,
       data: {
@@ -167,6 +230,7 @@ export const getSalesSummary = async (req, res, next) => {
         totalUniqueCustomers,
         repeatCustomers,
         repeatOrderRate,
+        regularCustomers,
         period,
       },
     });
@@ -230,13 +294,31 @@ export const getSalesChart = async (req, res, next) => {
   }
 };
 
+const escapeCsv = (val) => {
+  const s = String(val ?? '');
+  if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+};
+
+const formatDateReadable = (d) => {
+  return new Date(d).toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
 export const exportAnalytics = async (req, res, next) => {
   try {
     const period = req.query.period || 'weekly';
     const format = req.query.format || 'json';
     const { start, end } = getDateRange(period);
 
-    const [orderData, bulkData, summary] = await Promise.all([
+    const [orderData, bulkData, regularCustomers] = await Promise.all([
       Order.find({ createdAt: { $gte: start, $lte: end } })
         .populate('userId', 'name email')
         .sort({ createdAt: -1 })
@@ -246,75 +328,160 @@ export const exportAnalytics = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .lean(),
       (async () => {
-        const [ordCount, bulkCount, ordRev, bulkRev] = await Promise.all([
-          Order.countDocuments({ createdAt: { $gte: start, $lte: end } }),
-          BulkOrder.countDocuments({ createdAt: { $gte: start, $lte: end } }),
+        const [orderAgg, bulkAgg] = await Promise.all([
           Order.aggregate([
+            { $match: { createdAt: { $gte: start, $lte: end } } },
             {
-              $match: {
-                createdAt: { $gte: start, $lte: end },
-                status: { $in: ['completed', 'accepted', 'preparing'] },
+              $group: {
+                _id: '$userId',
+                orderCount: { $sum: 1 },
+                totalSpent: { $sum: '$totalPrice' },
               },
             },
-            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+            { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+            {
+              $project: {
+                name: { $ifNull: ['$user.name', 'Guest'] },
+                email: { $ifNull: ['$user.email', '-'] },
+                orderCount: 1,
+                totalSpent: 1,
+              },
+            },
           ]),
           BulkOrder.aggregate([
+            { $match: { createdAt: { $gte: start, $lte: end } } },
             {
-              $match: {
-                createdAt: { $gte: start, $lte: end },
-                status: { $in: ['completed', 'accepted', 'preparing'] },
+              $group: {
+                _id: '$userId',
+                orderCount: { $sum: 1 },
+                totalSpent: { $sum: '$totalPrice' },
               },
             },
-            { $group: { _id: null, total: { $sum: '$totalPrice' } } },
+            { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+            { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+            {
+              $project: {
+                name: { $ifNull: ['$user.name', 'Guest'] },
+                email: { $ifNull: ['$user.email', '-'] },
+                orderCount: 1,
+                totalSpent: 1,
+              },
+            },
           ]),
         ]);
-        return {
-          period,
-          startDate: start.toISOString(),
-          endDate: end.toISOString(),
-          totalTableOrders: ordCount,
-          totalBulkOrders: bulkCount,
-          totalOrders: ordCount + bulkCount,
-          totalRevenue: (ordRev[0]?.total || 0) + (bulkRev[0]?.total || 0),
-        };
+        const map = new Map();
+        for (const c of [...orderAgg, ...bulkAgg]) {
+          const key = String(c._id);
+          const existing = map.get(key);
+          if (existing) {
+            existing.orderCount += c.orderCount;
+            existing.totalSpent += c.totalSpent;
+          } else {
+            map.set(key, { name: c.name, email: c.email, orderCount: c.orderCount, totalSpent: c.totalSpent });
+          }
+        }
+        return Array.from(map.values()).sort((a, b) => b.orderCount - a.orderCount);
       })(),
     ]);
 
+    const totalRevenue = (orderData.filter((o) => ['completed', 'accepted', 'preparing'].includes(o.status)).reduce((s, o) => s + o.totalPrice, 0)) +
+      (bulkData.filter((o) => ['completed', 'accepted', 'preparing'].includes(o.status)).reduce((s, o) => s + o.totalPrice, 0));
+
+    const itemsSummary = (items) => {
+      if (!items?.length) return '-';
+      return items.map((i) => `${i.name} x${i.quantity}`).join(', ');
+    };
+
     const exportPayload = {
-      ...summary,
-      exportedAt: new Date().toISOString(),
-      tableOrders: orderData.map((o) => ({
-        id: o._id,
-        type: 'table',
-        tableNumber: o.tableNumber,
-        totalPrice: o.totalPrice,
-        status: o.status,
-        createdAt: o.createdAt,
-        items: o.items,
+      reportTitle: `Analytics Report - ${period}`,
+      period,
+      dateRange: {
+        from: formatDateReadable(start),
+        to: formatDateReadable(end),
+      },
+      exportedAt: formatDateReadable(new Date()),
+      summary: {
+        totalOrders: orderData.length + bulkData.length,
+        tableOrders: orderData.length,
+        bulkOrders: bulkData.length,
+        totalRevenue: `₹${totalRevenue.toFixed(2)}`,
+        uniqueCustomers: regularCustomers.length,
+      },
+      regularCustomers: regularCustomers.map((c) => ({
+        customerName: c.name,
+        email: c.email,
+        orderCount: c.orderCount,
+        totalSpent: `₹${Number(c.totalSpent).toFixed(2)}`,
       })),
-      bulkOrders: bulkData.map((o) => ({
-        id: o._id,
-        type: 'bulk',
-        pickupDate: o.pickupDate,
-        totalPrice: o.totalPrice,
-        status: o.status,
-        note: o.note,
-        createdAt: o.createdAt,
-        userId: o.userId,
-        items: o.items,
-      })),
+      orders: [...orderData.map((o) => ({ ...o, _type: 'table' })), ...bulkData.map((o) => ({ ...o, _type: 'bulk' }))]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .map((o) =>
+          o._type === 'table'
+            ? {
+                orderType: 'Table',
+                orderId: o._id.slice(-6).toUpperCase(),
+                customerName: o.userId?.name || 'Guest',
+                tableNumber: o.tableNumber,
+                items: itemsSummary(o.items),
+                total: `₹${Number(o.totalPrice).toFixed(2)}`,
+                status: o.status,
+                date: formatDateReadable(o.createdAt),
+              }
+            : {
+                orderType: 'Bulk',
+                orderId: o._id.slice(-6).toUpperCase(),
+                customerName: o.userId?.name || 'Guest',
+                items: itemsSummary(o.items),
+                total: `₹${Number(o.totalPrice).toFixed(2)}`,
+                status: o.status,
+                pickupDate: formatDateReadable(o.pickupDate),
+                date: formatDateReadable(o.createdAt),
+              }
+        ),
     };
 
     if (format === 'csv') {
-      const rows = [
-        ['Type', 'Order ID', 'Total', 'Status', 'Date'].join(','),
-        ...orderData.map((o) =>
-          ['Table', o._id, o.totalPrice, o.status, new Date(o.createdAt).toISOString()].join(',')
-        ),
-        ...bulkData.map((o) =>
-          ['Bulk', o._id, o.totalPrice, o.status, new Date(o.createdAt).toISOString()].join(',')
-        ),
-      ];
+      const rows = [];
+      rows.push('=== SUMMARY ===');
+      rows.push(`Period,${period}`);
+      rows.push(`Date Range,${formatDateReadable(start)} to ${formatDateReadable(end)}`);
+      rows.push(`Total Orders,${exportPayload.summary.totalOrders}`);
+      rows.push(`Table Orders,${exportPayload.summary.tableOrders}`);
+      rows.push(`Bulk Orders,${exportPayload.summary.bulkOrders}`);
+      rows.push(`Total Revenue,${exportPayload.summary.totalRevenue}`);
+      rows.push(`Unique Customers,${exportPayload.summary.uniqueCustomers}`);
+      rows.push('');
+      rows.push('=== REGULAR CUSTOMERS (Name, Email, Orders, Total Spent) ===');
+      rows.push(['Customer Name', 'Email', 'Order Count', 'Total Spent'].map(escapeCsv).join(','));
+      regularCustomers.forEach((c) => {
+        rows.push([c.name, c.email, c.orderCount, `₹${Number(c.totalSpent).toFixed(2)}`].map(escapeCsv).join(','));
+      });
+      rows.push('');
+      rows.push('=== ORDERS (Type, ID, Customer, Items, Total, Status, Date) ===');
+      rows.push(['Type', 'Order ID', 'Customer', 'Items', 'Total', 'Status', 'Date'].map(escapeCsv).join(','));
+      orderData.forEach((o) => {
+        rows.push([
+          'Table',
+          o._id.slice(-6).toUpperCase(),
+          o.userId?.name || 'Guest',
+          itemsSummary(o.items),
+          `₹${Number(o.totalPrice).toFixed(2)}`,
+          o.status,
+          formatDateReadable(o.createdAt),
+        ].map(escapeCsv).join(','));
+      });
+      bulkData.forEach((o) => {
+        rows.push([
+          'Bulk',
+          o._id.slice(-6).toUpperCase(),
+          o.userId?.name || 'Guest',
+          itemsSummary(o.items),
+          `₹${Number(o.totalPrice).toFixed(2)}`,
+          o.status,
+          formatDateReadable(o.createdAt),
+        ].map(escapeCsv).join(','));
+      });
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader(
         'Content-Disposition',

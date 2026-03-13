@@ -235,6 +235,39 @@ export default function SADashboard() {
             </section>
           )}
 
+          {/* Regular Customers */}
+          {!loading && (summary?.regularCustomers?.length ?? 0) > 0 && (
+            <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-100 min-w-0 overflow-hidden">
+              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4 flex items-center gap-2">
+                Regular Customers (by order count)
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="py-2.5 px-3 font-semibold text-slate-600">#</th>
+                      <th className="py-2.5 px-3 font-semibold text-slate-600">Customer Name</th>
+                      <th className="py-2.5 px-3 font-semibold text-slate-600 hidden sm:table-cell">Email</th>
+                      <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Orders</th>
+                      <th className="py-2.5 px-3 font-semibold text-slate-600 text-right">Total Spent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {summary.regularCustomers.map((c, i) => (
+                      <tr key={`${c.email}-${i}`} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                        <td className="py-2.5 px-3 text-slate-500">{i + 1}</td>
+                        <td className="py-2.5 px-3 font-medium text-slate-900">{c.name}</td>
+                        <td className="py-2.5 px-3 text-slate-600 hidden sm:table-cell truncate max-w-[180px]" title={c.email}>{c.email}</td>
+                        <td className="py-2.5 px-3 text-right font-semibold text-orange-600">{c.orderCount}</td>
+                        <td className="py-2.5 px-3 text-right font-semibold text-slate-900">₹{Number(c.totalSpent).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
           {/* Charts Section */}
           <section className="min-w-0">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 sm:mb-4">
