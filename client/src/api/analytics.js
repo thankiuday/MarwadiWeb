@@ -10,17 +10,16 @@ export const getSubscriptionSummary = (period = 'weekly') =>
 export const getSubscriptionChart = (period = 'weekly') =>
   api.get('/analytics/subscriptions/chart', { params: { period } });
 export const exportAnalytics = async (period = 'weekly', format = 'json') => {
-  const token = localStorage.getItem('token');
-  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-  const url = `${baseUrl.replace(/\/$/, '')}/api/analytics/export?period=${period}&format=${format}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
+  const res = await api.get('/analytics/export', {
+    params: { period, format },
+    responseType: 'blob',
   });
-  if (!res.ok) throw new Error('Export failed');
-  const blob = await res.blob();
-  const disposition = res.headers.get('Content-Disposition');
+  const disposition = res.headers['content-disposition'];
   const filenameMatch = disposition?.match(/filename="([^"]+)"/);
   const filename = filenameMatch?.[1] || `analytics-${period}.${format}`;
+  const blob = new Blob([res.data], {
+    type: format === 'csv' ? 'text/csv' : 'application/json',
+  });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = filename;
