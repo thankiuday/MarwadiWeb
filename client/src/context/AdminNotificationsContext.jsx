@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useAuth } from '../hooks/useAuth';
 import { useSocket } from '../hooks/useSocket';
 import { toast } from 'react-toastify';
+import { playNewOrderSound } from '../utils/notificationSounds';
 import { getAllOrders } from '../api/orders';
 import { getAllBulkOrders } from '../api/bulkOrders';
 
@@ -91,6 +92,7 @@ export function AdminNotificationsProvider({ children }) {
         return [notif, ...filtered];
       });
       toast.info(notif.message, { autoClose: 5000 });
+      playNewOrderSound();
     };
 
     const handleNewBulkOrder = (order) => {
@@ -101,6 +103,7 @@ export function AdminNotificationsProvider({ children }) {
         return [notif, ...filtered];
       });
       toast.info(notif.message, { autoClose: 5000 });
+      playNewOrderSound();
     };
 
     const handleNewSubscription = (sub) => {
@@ -118,6 +121,7 @@ export function AdminNotificationsProvider({ children }) {
         ...prev,
       ]);
       toast.info(msg, { autoClose: 5000 });
+      playNewOrderSound();
     };
 
     socket.on('new_order', handleNewOrder);

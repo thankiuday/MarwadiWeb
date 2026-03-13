@@ -1,6 +1,7 @@
 import { createContext, useState, useCallback, useContext, useEffect } from 'react';
 import { useSocket } from '../hooks/useSocket';
 import { useAuth } from '../hooks/useAuth';
+import { playBellSound } from '../utils/notificationSounds';
 
 export const NotificationsContext = createContext(null);
 
@@ -42,6 +43,7 @@ export function NotificationsProvider({ children }) {
         message: messages[status] || `Order status: ${status}`,
         time: new Date().toISOString(),
       });
+      playBellSound();
     };
 
     socket.on('order_status_updated', handler);
