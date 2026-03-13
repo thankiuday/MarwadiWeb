@@ -21,9 +21,16 @@ When users **Add to Home Screen** or **Install**, they get:
 1. **Order Food** – Opens `/menu` (customer flow)
 2. **Admin Panel** – Opens `/admin/login` (admin flow)
 
+### Install from correct page
+
+**Important:** The installed app opens to the page you were on when you installed:
+
+- **Install from `/admin/login`** (or any `/admin/*` or `/superadmin/*` page) → App opens to **Admin Login**
+- **Install from `/menu`** or other customer pages → App opens to **Customer** flow
+
 So you can share:
-- **Customers**: Use the "Order Food" shortcut or open the app and go to `/menu`
-- **Admins**: Use the "Admin Panel" shortcut or open the app and go to `/admin/login`
+- **Customers**: Share `https://your-app.com/menu` – they install from there, app opens to menu
+- **Admins**: Share `https://your-app.com/admin/login` – they install from there, app opens to admin login
 
 ## Installation
 
