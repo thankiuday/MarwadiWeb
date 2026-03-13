@@ -1,0 +1,35 @@
+{
+  "name": "King's Restaurant",
+  "short_name": "King's Restaurant",
+  "description": "QR ordering & subscription system - Order food, manage subscriptions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Order Food",
+      "short_name": "Order",
+      "description": "Browse menu and place orders",
+      "url": "/menu",
+      "icons": [{ "src": "/vite.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Admin Panel",
+      "short_name": "Admin",
+      "description": "Admin and Superadmin dashboard",
+      "url": "/admin/login",
+      "icons": [{ "src": "/vite.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
+  "categories": ["food", "lifestyle", "shopping"]
+}
