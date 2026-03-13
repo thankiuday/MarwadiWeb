@@ -316,6 +316,9 @@ export const exportAnalytics = async (req, res, next) => {
   try {
     const period = req.query.period || 'weekly';
     const format = req.query.format || 'json';
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[Export] Starting', period, format);
+    }
     const { start, end } = getDateRange(period);
 
     const [orderData, bulkData, regularCustomers] = await Promise.all([

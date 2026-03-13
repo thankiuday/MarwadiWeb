@@ -13,16 +13,24 @@ export const exportAnalytics = async (period = 'weekly', format = 'json') => {
   const res = await api.get('/analytics/export', {
     params: { period, format },
     responseType: 'blob',
+    timeout: 60000,
+    skipAuthRedirect: true,
   });
   const disposition = res.headers['content-disposition'];
   const filenameMatch = disposition?.match(/filename="([^"]+)"/);
   const filename = filenameMatch?.[1] || `analytics-${period}.${format}`;
-  const blob = new Blob([res.data], {
+  const blob = res.data instanceof Blob ? res.data : new Blob([res.data], {
     type: format === 'csv' ? 'text/csv' : 'application/json',
   });
+  if (blob.size === 0) {
+    throw new Error('Export returned empty data');
+  }
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };

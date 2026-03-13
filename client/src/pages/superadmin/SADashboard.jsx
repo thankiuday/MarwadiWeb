@@ -87,8 +87,21 @@ export default function SADashboard() {
     try {
       await exportAnalytics(period, format);
       toast.success(`Data exported as ${format.toUpperCase()}`);
-    } catch {
-      toast.error('Failed to export');
+    } catch (err) {
+      let message = 'Failed to export';
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          if (parsed?.message) message = parsed.message;
+        } catch {
+          // ignore parse error
+        }
+      } else if (err.message) {
+        message = err.message;
+      }
+      toast.error(message);
+      console.error('Export failed:', err.response?.status, err.message, err);
     } finally {
       setExporting(false);
     }
