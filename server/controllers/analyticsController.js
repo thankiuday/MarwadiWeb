@@ -423,7 +423,7 @@ export const exportAnalytics = async (req, res, next) => {
           o._type === 'table'
             ? {
                 orderType: 'Table',
-                orderId: o._id.slice(-6).toUpperCase(),
+                orderId: String(o._id).slice(-6).toUpperCase(),
                 customerName: o.userId?.name || 'Guest',
                 tableNumber: o.tableNumber,
                 items: itemsSummary(o.items),
@@ -433,7 +433,7 @@ export const exportAnalytics = async (req, res, next) => {
               }
             : {
                 orderType: 'Bulk',
-                orderId: o._id.slice(-6).toUpperCase(),
+                orderId: String(o._id).slice(-6).toUpperCase(),
                 customerName: o.userId?.name || 'Guest',
                 items: itemsSummary(o.items),
                 total: `₹${Number(o.totalPrice).toFixed(2)}`,
@@ -466,7 +466,7 @@ export const exportAnalytics = async (req, res, next) => {
       orderData.forEach((o) => {
         rows.push([
           'Table',
-          o._id.slice(-6).toUpperCase(),
+          String(o._id).slice(-6).toUpperCase(),
           o.userId?.name || 'Guest',
           itemsSummary(o.items),
           `₹${Number(o.totalPrice).toFixed(2)}`,
@@ -477,7 +477,7 @@ export const exportAnalytics = async (req, res, next) => {
       bulkData.forEach((o) => {
         rows.push([
           'Bulk',
-          o._id.slice(-6).toUpperCase(),
+          String(o._id).slice(-6).toUpperCase(),
           o.userId?.name || 'Guest',
           itemsSummary(o.items),
           `₹${Number(o.totalPrice).toFixed(2)}`,
