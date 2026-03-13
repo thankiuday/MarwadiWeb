@@ -17,8 +17,8 @@ export default function MenuPage() {
   useEffect(() => {
     const fetchMenu = async () => {
       try {
-        const { data } = await getMenuItems({ available: true });
-        setItems(data.data);
+        const { data } = await getMenuItems();
+        setItems(data.data || []);
       } catch {
         setItems([]);
       } finally {

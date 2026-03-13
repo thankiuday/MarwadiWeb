@@ -152,7 +152,7 @@ export default function SADashboard() {
               <HiChartBar className="w-4 h-4 shrink-0" />
               Order Overview
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 min-w-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 min-w-0">
               {loading ? (
                 Array.from({ length: 6 }).map((_, i) => <StatSkeleton key={i} />)
               ) : (
@@ -173,6 +173,26 @@ export default function SADashboard() {
                     labelShort="AOV"
                     value={`₹${Math.round(summary?.averageOrderValue || 0).toLocaleString()}`}
                     color="blue"
+                  />
+                  <StatsCard
+                    icon="👥"
+                    label="Unique Customers"
+                    labelShort="Customers"
+                    value={summary?.totalUniqueCustomers || 0}
+                    color="teal"
+                  />
+                  <StatsCard
+                    icon="🔄"
+                    label="Repeat Customers"
+                    labelShort="Repeat"
+                    value={summary?.repeatCustomers || 0}
+                    color="indigo"
+                  />
+                  <StatsCard
+                    icon="📈"
+                    label="Repeat Rate"
+                    value={`${(summary?.repeatOrderRate || 0).toFixed(1)}%`}
+                    color="emerald"
                   />
                 </>
               )}

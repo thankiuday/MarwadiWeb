@@ -30,6 +30,24 @@ export default function StatsCard({ icon, label, labelShort, value, color = 'ora
       text: 'text-rose-600',
       border: 'border-rose-200',
     },
+    teal: {
+      bg: 'bg-teal-500/10',
+      iconBg: 'bg-teal-500',
+      text: 'text-teal-600',
+      border: 'border-teal-200',
+    },
+    indigo: {
+      bg: 'bg-indigo-500/10',
+      iconBg: 'bg-indigo-500',
+      text: 'text-indigo-600',
+      border: 'border-indigo-200',
+    },
+    emerald: {
+      bg: 'bg-emerald-500/10',
+      iconBg: 'bg-emerald-500',
+      text: 'text-emerald-600',
+      border: 'border-emerald-200',
+    },
   };
 
   const config = colorConfig[color] || colorConfig.orange;

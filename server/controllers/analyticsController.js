@@ -84,7 +84,7 @@ export const getSalesSummary = async (req, res, next) => {
     const revenueOrderCount = (orderRevenue[0]?.count || 0) + (bulkRevenue[0]?.count || 0);
     const averageOrderValue = revenueOrderCount > 0 ? totalRevenue / revenueOrderCount : 0;
 
-    const [orderPopular, bulkPopular] = await Promise.all([
+    const [orderPopular, bulkPopular, orderCustomerCounts, bulkCustomerCounts] = await Promise.all([
       Order.aggregate([
         { $match: orderMatch },
         { $unwind: '$items' },
@@ -109,6 +109,14 @@ export const getSalesSummary = async (req, res, next) => {
         },
         { $sort: { totalOrdered: -1 } },
       ]),
+      Order.aggregate([
+        { $match: orderMatch },
+        { $group: { _id: '$userId', count: { $sum: 1 } } },
+      ]),
+      BulkOrder.aggregate([
+        { $match: bulkMatch },
+        { $group: { _id: '$userId', count: { $sum: 1 } } },
+      ]),
     ]);
 
     const popularMap = new Map();
@@ -130,6 +138,17 @@ export const getSalesSummary = async (req, res, next) => {
       count: t.count,
     }));
 
+    const customerOrderMap = new Map();
+    for (const c of orderCustomerCounts) {
+      customerOrderMap.set(String(c._id), (customerOrderMap.get(String(c._id)) || 0) + c.count);
+    }
+    for (const c of bulkCustomerCounts) {
+      customerOrderMap.set(String(c._id), (customerOrderMap.get(String(c._id)) || 0) + c.count);
+    }
+    const totalUniqueCustomers = customerOrderMap.size;
+    const repeatCustomers = Array.from(customerOrderMap.values()).filter((n) => n >= 2).length;
+    const repeatOrderRate = totalUniqueCustomers > 0 ? (repeatCustomers / totalUniqueCustomers) * 100 : 0;
+
     res.json({
       success: true,
       data: {
@@ -145,6 +164,9 @@ export const getSalesSummary = async (req, res, next) => {
         averageOrderValue,
         popularItems,
         ordersByTable: ordersByTableFormatted,
+        totalUniqueCustomers,
+        repeatCustomers,
+        repeatOrderRate,
         period,
       },
     });

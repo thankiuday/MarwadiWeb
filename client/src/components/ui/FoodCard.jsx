@@ -9,12 +9,12 @@ export default function FoodCard({ item }) {
 
   return (
     <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-md active:scale-[0.98] transition-all duration-300 group flex flex-col h-full">
-      <Link to={`/menu/${item._id}`} className="relative block aspect-square w-full flex-shrink-0">
+      <Link to={`/menu/${item._id}`} className="relative block aspect-square w-full flex-shrink-0 overflow-hidden bg-gray-100">
         {item.image ? (
           <img
             src={item.image}
             alt={item.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-orange-100 to-amber-50 flex items-center justify-center">

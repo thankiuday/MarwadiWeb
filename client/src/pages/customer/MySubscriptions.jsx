@@ -117,15 +117,18 @@ export default function MySubscriptions() {
           </div>
         ) : (
           <div className="space-y-4 animate-fade-in">
-            {subscriptions.map((sub) => (
+            {subscriptions.map((sub) => {
+              const isEnded = new Date(sub.endDate) < new Date();
+              const displayStatus = isEnded ? 'expired' : (sub.status || 'active');
+              return (
               <div key={sub._id} className="bg-white rounded-xl p-4 sm:p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-bold text-gray-900">{sub.plan?.name}</h3>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
-                    sub.status === 'active' ? 'bg-green-100 text-green-700' :
-                    sub.status === 'expired' ? 'bg-gray-100 text-gray-500' : 'bg-red-100 text-red-700'
+                    displayStatus === 'active' ? 'bg-green-100 text-green-700' :
+                    displayStatus === 'expired' ? 'bg-gray-100 text-gray-500' : 'bg-red-100 text-red-700'
                   }`}>
-                    {sub.status}
+                    {displayStatus}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500">
@@ -236,7 +239,8 @@ export default function MySubscriptions() {
                   })()}
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
