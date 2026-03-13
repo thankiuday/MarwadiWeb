@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getApiError } from '../../utils/getApiError';
 import { getAllOrders, updateOrderStatus } from '../../api/orders';
@@ -15,12 +16,35 @@ const SORT_OPTIONS = [
 ];
 
 export default function SAOrders() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [bulkOrders, setBulkOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
   const [newOrderIds, setNewOrderIds] = useState(new Set());
+  const [highlightOrderId, setHighlightOrderId] = useState(null);
   const { socket } = useSocket();
+
+  useEffect(() => {
+    const state = location.state;
+    if (state?.highlightOrderId) {
+      setHighlightOrderId(state.highlightOrderId);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!highlightOrderId) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`order-${highlightOrderId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setHighlightOrderId(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [highlightOrderId, orders, bulkOrders]);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -149,6 +173,7 @@ export default function SAOrders() {
           onBulkOrderStatusChange={handleBulkOrderStatusChange}
           showActions
           newOrderIds={newOrderIds}
+          highlightOrderId={highlightOrderId}
         />
       </div>
     </AdminLayout>

@@ -141,12 +141,19 @@ export default function Sidebar() {
               ) : (
                 notifications.slice(0, 10).map((n) => {
                   const ordersPath = user?.role === 'superadmin' ? '/superadmin/orders' : '/admin/orders';
+                  const subsPath = '/superadmin/subscription-subscribers';
+                  const targetPath = n.type === 'subscription' ? subsPath : ordersPath;
+                  const navState = n.type === 'subscription' ? {} : { highlightOrderId: n.orderId, orderType: n.type };
                   return (
-                    <NavLink
+                    <button
                       key={n.id}
-                      to={ordersPath}
-                      onClick={() => { setShowNotifs(false); closeMobile(); }}
-                      className="block px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0 cursor-pointer transition-colors"
+                      type="button"
+                      onClick={() => {
+                        setShowNotifs(false);
+                        closeMobile();
+                        navigate(targetPath, { state: navState });
+                      }}
+                      className="w-full text-left block px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0 cursor-pointer transition-colors"
                     >
                       <p className="text-sm font-medium text-gray-200">{n.message}</p>
                       {n.itemsSummary && (
@@ -162,7 +169,7 @@ export default function Sidebar() {
                           <span className="text-xs font-semibold text-orange-400">₹{Number(n.totalPrice).toFixed(2)}</span>
                         )}
                       </div>
-                    </NavLink>
+                    </button>
                   );
                 })
               )}

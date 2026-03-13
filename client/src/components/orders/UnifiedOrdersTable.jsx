@@ -8,6 +8,7 @@ export default function UnifiedOrdersTable({
   onBulkOrderStatusChange,
   showActions = false,
   newOrderIds = new Set(),
+  highlightOrderId = null,
 }) {
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -65,8 +66,9 @@ export default function UnifiedOrdersTable({
           orders.map((order) => (
             <div
               key={`${order.type}-${order._id}`}
+              id={highlightOrderId === order._id ? `order-${order._id}` : undefined}
               className={`bg-white rounded-xl p-4 shadow-sm relative ${
-                newOrderIds.has(order._id) ? 'ring-2 ring-orange-400 ring-offset-2' : ''
+                newOrderIds.has(order._id) || highlightOrderId === order._id ? 'ring-2 ring-orange-400 ring-offset-2' : ''
               }`}
             >
               {newOrderIds.has(order._id) && (
@@ -148,8 +150,9 @@ export default function UnifiedOrdersTable({
                 orders.map((order) => (
                   <tr
                     key={`${order.type}-${order._id}`}
+                    id={highlightOrderId === order._id ? `order-${order._id}` : undefined}
                     className={`hover:bg-gray-50/50 transition-colors ${
-                      newOrderIds.has(order._id) ? 'bg-orange-50/50' : ''
+                      newOrderIds.has(order._id) || highlightOrderId === order._id ? 'bg-orange-50/50' : ''
                     }`}
                   >
                     <td className="px-4 py-3">

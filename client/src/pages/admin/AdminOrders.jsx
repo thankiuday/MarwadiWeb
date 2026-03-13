@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getApiError } from '../../utils/getApiError';
 import { getAllOrders, updateOrderStatus } from '../../api/orders';
@@ -8,10 +9,33 @@ import AdminHeader from '../../components/layout/AdminHeader';
 import OrdersTable from '../../components/orders/OrdersTable';
 
 export default function AdminOrders() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newOrderIds, setNewOrderIds] = useState(new Set());
+  const [highlightOrderId, setHighlightOrderId] = useState(null);
   const { socket } = useSocket();
+
+  useEffect(() => {
+    const state = location.state;
+    if (state?.highlightOrderId) {
+      setHighlightOrderId(state.highlightOrderId);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!highlightOrderId) return;
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`order-${highlightOrderId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setHighlightOrderId(null);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [highlightOrderId, orders]);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -78,6 +102,7 @@ export default function AdminOrders() {
           onStatusChange={handleStatusChange}
           showActions
           newOrderIds={newOrderIds}
+          highlightOrderId={highlightOrderId}
         />
       </div>
     </AdminLayout>
