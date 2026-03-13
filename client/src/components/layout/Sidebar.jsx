@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   HiOutlineChartBarSquare,
   HiOutlineClipboardDocumentList,
@@ -127,13 +127,17 @@ export default function Sidebar() {
               <div className="px-3 py-2 border-b border-gray-700 flex items-center justify-between">
                 <p className="text-xs font-semibold text-gray-400 uppercase">Notifications</p>
                 {notifications.length > 0 && (
-                  <NavLink
-                    to={user?.role === 'superadmin' ? '/superadmin/notifications' : '/admin/orders'}
-                    onClick={() => { setShowNotifs(false); closeMobile(); }}
-                    className="text-xs text-orange-400 hover:text-orange-300 font-medium"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowNotifs(false);
+                      closeMobile();
+                      navigate(user?.role === 'superadmin' ? '/superadmin/notifications' : '/admin/orders');
+                    }}
+                    className="text-xs text-orange-400 hover:text-orange-300 font-medium cursor-pointer bg-transparent border-0 p-0"
                   >
                     View all
-                  </NavLink>
+                  </button>
                 )}
               </div>
               {notifications.length === 0 ? (
@@ -145,13 +149,13 @@ export default function Sidebar() {
                   const targetPath = n.type === 'subscription' ? subsPath : ordersPath;
                   const navState = n.type === 'subscription' ? {} : { highlightOrderId: n.orderId, orderType: n.type };
                   return (
-                    <button
+                    <Link
                       key={n.id}
-                      type="button"
-                      onClick={() => {
+                      to={{ pathname: targetPath, state: navState }}
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setShowNotifs(false);
                         closeMobile();
-                        navigate(targetPath, { state: navState });
                       }}
                       className="w-full text-left block px-4 py-3 hover:bg-gray-700/50 border-b border-gray-700/50 last:border-0 cursor-pointer transition-colors"
                     >
@@ -169,7 +173,7 @@ export default function Sidebar() {
                           <span className="text-xs font-semibold text-orange-400">₹{Number(n.totalPrice).toFixed(2)}</span>
                         )}
                       </div>
-                    </button>
+                    </Link>
                   );
                 })
               )}
